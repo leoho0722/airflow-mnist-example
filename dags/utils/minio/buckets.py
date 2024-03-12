@@ -59,3 +59,10 @@ def upload_file_to_bucket(
         print(
             f"upload file {file_path} to minio bucket {bucket_name} occurs error. Error: {err}"
         )
+
+def object_exists(client: Minio, bucket_name: str, object_name: str):
+    try:
+        client.stat_object(bucket_name=bucket_name, object_name=object_name)
+        return True
+    except:
+        return False

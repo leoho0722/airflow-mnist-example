@@ -22,6 +22,7 @@ Y_TEST_ONE_HOT_ENCODING_PKL_FILENAME = "y_TestOneHot.pkl"
 TRAINED_MODEL_KERAS_FILENAME = "trained_model.keras"
 
 # ===== Directory Path =====
+MNIST_PARENT_DIR = "./"
 MNIST_ROOT_DIR = "./mnist"
 MNIST_DATASETS_DIR = f"{MNIST_ROOT_DIR}/datasets"
 MNIST_NORMALIZE_DIR = f"{MNIST_ROOT_DIR}/normalize"
