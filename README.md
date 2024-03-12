@@ -2,6 +2,14 @@
 
 ## Environment Install
 
+### MNIST CNN Model Datasets
+
+#### Download
+
+```shell
+https://storage.googleapis.com/tensorflow/tf-keras-datasets/mnist.npz
+```
+
 ### Airflow
 
 #### Install from PyPI
