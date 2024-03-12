@@ -10,14 +10,30 @@
 https://storage.googleapis.com/tensorflow/tf-keras-datasets/mnist.npz
 ```
 
-### Python Packages
+### Python
 
 Python Version: 3.10.13
 
 #### Install
 
 ```shell
+wget https://www.python.org/ftp/python/3.10.13/Python-3.10.13.tgz
+tar -xvf Python-3.10.13.tgz
+cd Python-3.10.13
+./configure --enable-optimizations
+sudo make install
+python3.10 --version
+```
 
+#### Update PIP
+
+```shell
+python3.10 -m pip install --upgrade pip
+```
+
+#### Install Dependencies
+
+```shell
 python3.10 -m pip install -r requirements.txt
 ```
 
