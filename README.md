@@ -10,13 +10,22 @@
 https://storage.googleapis.com/tensorflow/tf-keras-datasets/mnist.npz
 ```
 
+### Python Packages
+
+Python Version: 3.10.13
+
+#### Install
+
+```shell
+
+python3.10 -m pip install -r requirements.txt
+```
+
 ### Airflow
 
 #### Install from PyPI
 
-```shell
-python3.10 -m pip install apache-airflow
-```
+Already installed through requirements.txt
 
 #### Settings Environment Path for Airflow
 
