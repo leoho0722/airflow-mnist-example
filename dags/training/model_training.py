@@ -1,38 +1,39 @@
-import os
-import pickle
-# import requests
+from env import env
+from utils.utils import convert_pkl_to_data
+from utils.minio import client as mc
+from utils.minio import buckets as mc_buckets
 
 from keras.layers import Conv2D, Dense, Dropout, Flatten, MaxPool2D
 from keras.models import Sequential
 
-from minio import Minio
-from minio.error import S3Error
 
+def model_training():
+    # 連接 MinIO Server 並建立 Bucket
+    minioClient = mc.connect_minio()
+    bucket_names = [
+        env.MNIST_NORMALIZE_BUCKET_NAME,
+        env.MNIST_ONEHOT_ENCODING_BUCKET_NAME,
+        env.MNIST_TRAINING_MODEL_BUCKET_NAME
+    ]
+    mc_buckets.create_buckets(minioClient, bucket_names)
 
-X_TRAIN4D_NORMALIZE_PKL_FILENAME = "X_Train4D_normalize.pkl"
-Y_TRAIN_ONE_HOT_ENCODING_PKL_FILENAME = "y_Train_One_Hot_Encoding.pkl"
-TRAINED_MODEL_KERAS_FILENAME = "trained_model.keras"
-# OPENFAAS_GATEWAY_ENDPOINT = os.environ["openfaas_gateway_endpoint"]
-
-
-def training_model():
-    minioClient = connect_minio()
-    bucket_names = get_bucket_names()
-    create_buckets(minioClient, bucket_names)
-
-    # 從 MinIO 取得上一個階段的資料
-    get_file_from_bucket(client=minioClient,
-                         bucket_name="mnist-normalize",
-                         object_name=X_TRAIN4D_NORMALIZE_PKL_FILENAME,
-                         file_path=f"/home/app/{X_TRAIN4D_NORMALIZE_PKL_FILENAME}")
+    # 從 MinIO 取得預處理的資料
+    mc_buckets.get_file_from_bucket(
+        client=minioClient,
+        bucket_name=env.MNIST_NORMALIZE_BUCKET_NAME,
+        object_name=env.X_TRAIN4D_NORMALIZE_PKL_FILENAME,
+        file_path=env.X_TRAIN4D_NORMALIZE_FILE_PATH
+    )
     X_Train4D_normalize = convert_pkl_to_data(
-        f"/home/app/{X_TRAIN4D_NORMALIZE_PKL_FILENAME}")
-    get_file_from_bucket(client=minioClient,
-                         bucket_name="mnist-onehot-encoding",
-                         object_name=Y_TRAIN_ONE_HOT_ENCODING_PKL_FILENAME,
-                         file_path=f"/home/app/{Y_TRAIN_ONE_HOT_ENCODING_PKL_FILENAME}")
-    y_TrainOneHot = convert_pkl_to_data(
-        f"/home/app/{Y_TRAIN_ONE_HOT_ENCODING_PKL_FILENAME}")
+        env.X_TRAIN4D_NORMALIZE_FILE_PATH
+    )
+    mc_buckets.get_file_from_bucket(
+        client=minioClient,
+        bucket_name=env.MNIST_ONEHOT_ENCODING_BUCKET_NAME,
+        object_name=env.Y_TRAIN_ONE_HOT_ENCODING_PKL_FILENAME,
+        file_path=env.Y_TRAIN_ONE_HOT_ENCODING_FILE_PATH
+    )
+    y_TrainOneHot = convert_pkl_to_data(env.Y_TRAIN_ONE_HOT_ENCODING_FILE_PATH)
 
     # 建立模型
     model = model_build()
@@ -43,17 +44,13 @@ def training_model():
                                       onehot_data=y_TrainOneHot)
 
     # 將訓練後的模型資料儲存到 MinIO Bucket
-    save_trained_model(trained_model, TRAINED_MODEL_KERAS_FILENAME)
-    upload_file_to_bucket(client=minioClient,
-                          bucket_name=bucket_names[0],
-                          object_name=TRAINED_MODEL_KERAS_FILENAME,
-                          file_path=f"/home/app/{TRAINED_MODEL_KERAS_FILENAME}")
-
-    # 觸發下一個階段
-    # next_stage = os.environ["next_stage"]
-    # trigger(next_stage)
-
-    # return response(200, f"mnist-model-build completed, trigger stage {next_stage}...")
+    save_trained_model(trained_model, env.TRAINED_MODEL_KERAS_FILE_PATH)
+    mc_buckets.upload_file_to_bucket(
+        client=minioClient,
+        bucket_name=env.MNIST_TRAINING_MODEL_BUCKET_NAME,
+        object_name=env.TRAINED_MODEL_KERAS_FILENAME,
+        file_path=env.TRAINED_MODEL_KERAS_FILE_PATH
+    )
 
 
 def model_build():
@@ -162,116 +159,3 @@ def save_trained_model(model, filename: str):
     """
 
     model.save(filename)
-
-
-def connect_minio():
-    """連接 MinIO Server"""
-
-    MINIO_API_ENDPOINT = os.environ["minio_api_endpoint"]
-    MINIO_ACCESS_KEY = os.environ["minio_access_key"]
-    MINIO_SECRET_KEY = os.environ["minio_secret_key"]
-
-    return Minio(
-        MINIO_API_ENDPOINT,
-        access_key=MINIO_ACCESS_KEY,
-        secret_key=MINIO_SECRET_KEY,
-        secure=False
-    )
-
-
-def get_bucket_names():
-    """從環境變數中取得 MinIO Bucket 名稱"""
-
-    bucket_names = os.environ["bucket_names"]
-    return bucket_names.split(",")
-
-
-def create_buckets(client, bucket_names: list):
-    """建立 MinIO Bucket
-
-    Args:
-        client: MinIO Client instance
-        bucket_names (list): 要建立的 MinIO Bucket 名稱
-    """
-
-    for name in bucket_names:
-        if client.bucket_exists(name):
-            print(f"Bucket {name} already exists")
-        else:
-            client.make_bucket(name)
-            print(f"Bucket {name} created")
-
-
-def get_file_from_bucket(client, bucket_name: str, object_name: str, file_path: str):
-    """取得 MinIO Bucket 內的資料
-
-    Args:
-        client: MinIO Client instance
-        bucket_name (str): MinIO Bucket 名稱
-        object_name (str): 要取得的 object 名稱
-        file_path (str): 下載後的檔案路徑
-    """
-
-    client.fget_object(bucket_name, object_name, file_path)
-
-
-def upload_file_to_bucket(client, bucket_name: str, object_name: str, file_path: str):
-    """上傳資料到 MinIO Bucket 內
-
-    Args:
-        client: MinIO Client instance
-        bucket_name (str): MinIO Bucket 名稱
-        object_name (str): 要上傳到 MinIO Bucket 的 object 檔案名稱
-        file_path (str): 要上傳到 MinIO Bucket 的檔案路徑
-    """
-
-    try:
-        client.fput_object(bucket_name=bucket_name,
-                           object_name=object_name,
-                           file_path=file_path)
-    except S3Error as err:
-        print(
-            f"upload file {file_path} to MinIO bucket {bucket_name} occurs error. Error: {err}"
-        )
-
-
-def convert_pkl_to_data(filename: str):
-    """將 pkl 檔案轉換回原始資料
-
-    Args:
-        filename (str): pkl 檔案名稱
-    """
-
-    with open(filename, 'rb') as f:
-        data = pickle.load(f)
-    return data
-
-
-# def trigger(next_stage: str):
-#     """觸發下一個階段
-
-#     Args:
-#         next_stage (str): 下一個階段的名稱
-#     """
-
-#     req_body = {
-#         "next_stage": next_stage
-#     }
-#     _ = requests.post(
-#         f"http://{OPENFAAS_GATEWAY_ENDPOINT}/function/mnist-faas-trigger",
-#         json=req_body
-#     )
-
-
-# def response(statusCode: int, message: str):
-#     """Create an HTTP response.
-
-#     Args:
-#         statusCode (int): HTTP status code
-#         message (str): trigger message
-#     """
-
-#     return {
-#         "statusCode": statusCode,
-#         "message": message,
-#     }
