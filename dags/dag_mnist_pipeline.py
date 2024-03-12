@@ -1,4 +1,4 @@
-from env import env
+from constants import env
 from utils.utils import mkdir
 from preprocess import data_preprocess
 from training import model_training

@@ -1,4 +1,4 @@
-from env import env
+from constants import env
 from utils.utils import convert_pkl_to_data
 from utils.minio import client as mc
 from utils.minio import buckets as mc_buckets
