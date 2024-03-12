@@ -133,10 +133,9 @@ mc admin info <ALIAS_NAME>
 ## Run
 
 1. Start MinIO Server
-   * `minio server ~/minio --console-address :9001`
-2. Start Airflow Instance
-    * `export AIRFLOW_HOME=$(pwd)`
-    * `airflow standalone`
+   * `make run-minio-server`
+2. Start Airflow standalone Instance
+    * `make run-airflow-standalone`
 3. Run Airflow DAG on Web UI
    * `http://<HOST_IP>:8080`
       * Username: `admin`
