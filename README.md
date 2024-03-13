@@ -17,9 +17,11 @@ Python Version: 3.10.13
 #### Install from Source Code
 
 ```shell
+sudo apt-get update
 wget https://www.python.org/ftp/python/3.10.13/Python-3.10.13.tgz
 tar -xvf Python-3.10.13.tgz
 cd Python-3.10.13
+sudo apt-get install sqlite3 libsqlite3-dev
 ./configure --enable-optimizations --enable-loadable-sqlite-extensions
 sudo make
 sudo make install
