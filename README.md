@@ -14,6 +14,29 @@ https://storage.googleapis.com/tensorflow/tf-keras-datasets/mnist.npz
 
 Python Version: 3.10.13
 
+#### Install Essential Libraries
+
+```shell
+# OpenSSL (use general user)
+# Solved Error: Python require OpenSSL 1.1.1 or newer
+wget https://www.openssl.org/source/openssl-1.1.1w.tar.gz
+tar -xvf openssl-1.1.1w.tar.gz
+cd openssl-1.1.1w
+./config
+sudo make
+sudo make install
+```
+
+```shell
+# Solved ImportError: No module named '_ctypes' 
+sudo apt-get install libffi-dev
+```
+
+```shell
+# Solved ImportError: No module named '_sqlite3'
+sudo apt-get install sqlite3
+```
+
 #### Install from Source Code
 
 ```shell
@@ -21,7 +44,7 @@ sudo apt-get update
 wget https://www.python.org/ftp/python/3.10.13/Python-3.10.13.tgz
 tar -xvf Python-3.10.13.tgz
 cd Python-3.10.13
-sudo apt-get install sqlite3 libsqlite3-dev
+sudo apt-get install sqlite3 libffi-dev
 ./configure --enable-optimizations --enable-loadable-sqlite-extensions
 sudo make
 sudo make install
@@ -38,18 +61,38 @@ python3.10
 >> print("import sqlite3 success")
 ```
 
+##### Test openssl
+
+see "import ssl success" message if ssl is installed successfully.
+
+```shell
+python3.10
+>> import ssl
+>> print("import ssl success")
+```
+
+##### Test ctypes
+
+see "import ctypes success" message if ctypes is installed successfully.
+
+```shell
+python3.10
+>> import ctypes
+>> print("import ctypes success")
+```
+
 #### Update PIP
 
 ```shell
 # Use root user
-python3.10 -m pip install --upgrade pip
+sudo python3.10 -m pip install --upgrade pip
 ```
 
 #### Install Dependencies
 
 ```shell
 # Use root user
-python3.10 -m pip install -r requirements.txt
+sudo python3.10 -m pip install -r requirements.txt
 ```
 
 ### Airflow
