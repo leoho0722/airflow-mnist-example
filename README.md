@@ -14,7 +14,9 @@ https://storage.googleapis.com/tensorflow/tf-keras-datasets/mnist.npz
 
 Python Version: 3.10.13
 
-#### Install Essential Libraries
+<details>
+
+<summary>Install Essential Libraries</summary>
 
 ```shell
 # OpenSSL (use general user)
@@ -37,7 +39,21 @@ sudo apt-get install libffi-dev
 sudo apt-get install sqlite3
 ```
 
-#### Install from Source Code
+```shell
+# Solved AttributeError: module 'lib' has no attribute 'X509_V_FLAG_CB_ISSUER_CHECK'
+# Reference: https://0xzx.com/zh-tw/2023020303323135609.html
+sudo apt remove python3-pip 
+wget https://bootstrap.pypa.io/get-pip.py
+sudo python3 get-pip.py
+# Kill Terminal or Reboot
+pip install pyopenssl --upgrade
+```
+
+</details>
+
+<details>
+
+<summary>Build from Source Code</summary>
 
 ```shell
 sudo apt-get update
@@ -51,7 +67,7 @@ sudo make install
 python3.10 --version
 ```
 
-##### Test sqlite3
+#### Test sqlite3
 
 see "import sqlite3 success" message if sqlite3 is installed successfully.
 
@@ -61,7 +77,7 @@ python3.10
 >> print("import sqlite3 success")
 ```
 
-##### Test openssl
+#### Test openssl
 
 see "import ssl success" message if ssl is installed successfully.
 
@@ -71,7 +87,7 @@ python3.10
 >> print("import ssl success")
 ```
 
-##### Test ctypes
+#### Test ctypes
 
 see "import ctypes success" message if ctypes is installed successfully.
 
@@ -80,6 +96,8 @@ python3.10
 >> import ctypes
 >> print("import ctypes success")
 ```
+
+</details>
 
 #### Update PIP
 
