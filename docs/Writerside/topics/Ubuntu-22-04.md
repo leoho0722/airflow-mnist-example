@@ -51,7 +51,7 @@ deactivate
 
 ```Shell
 # In venv
-pip install -r requirements.txt
+pip install -r requirements-py310.txt
 ```
 
 #### Manual
