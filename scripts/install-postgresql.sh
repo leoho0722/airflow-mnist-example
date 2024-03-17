@@ -40,10 +40,22 @@ curl -fsS https://www.pgadmin.org/static/packages_pgadmin_org.pub | sudo gpg --d
 sudo sh -c 'echo "deb [signed-by=/usr/share/keyrings/packages-pgadmin-org.gpg] https://ftp.postgresql.org/pub/pgadmin/pgadmin4/apt/$(lsb_release -cs) pgadmin4 main" > /etc/apt/sources.list.d/pgadmin4.list && apt update'
 
 # Install for both desktop and web modes:
-sudo apt install pgadmin4
+sudo apt install -y pgadmin4
 
 # Configure the webserver, if you installed pgadmin4-web:
 sudo /usr/pgadmin4/bin/setup-web.sh
+
+# ===== 啟動 pgAdmin4 =====
+# Email: admin@admin.com
+# Password: postgres
+# 開啟瀏覽器，輸入 http://localhost/pgadmin4
+# 點選 Add New Server，填入以下資訊
+# General/Name: Airflow
+# Connection/Host name/address: localhost
+# Connection/Port: 5432
+# Connection/Maintenance database: airflow_db
+# Connection/Username: postgres
+# Connection/Password: postgres
 
 # ===== 修改 airflo.cfg =====
 # 先啟動 airflow standalone，產生 airflow.cfg

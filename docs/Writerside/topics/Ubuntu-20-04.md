@@ -6,7 +6,7 @@
 
 ```Shell
 sudo apt-get update && sudo apt-get upgrade -y
-sudo apt-get install -y build-essential
+sudo apt-get install -y build-essential curl
 ```
 
 ## Python
@@ -51,17 +51,17 @@ deactivate
 
 ```Shell
 # In venv
-sudo pip install -r requirements.txt
+pip install -r requirements.txt
 ```
 
 #### Manual
 
 ```Shell
 # In venv
-sudo pip install tensorflow==2.13.1 apache-airflow==2.8.3 minio==7.2.5
-sudo pip install werkzeug==2.2.3 # Optional, reinstall if the above software packages cause incompatibility
-sudo pip install packaging==23.2 # Optional, reinstall if the above software packages cause incompatibility
-sudo pip install importlib-metadata==6.5.0 # Optional, reinstall if the above software packages cause incompatibility
+pip install tensorflow==2.13.1 apache-airflow==2.8.3 apache-airflow-providers-postgres==5.10.2 minio==7.2.5
+pip install werkzeug==2.2.3 # Optional, reinstall if the above software packages cause incompatibility
+pip install packaging==23.2 # Optional, reinstall if the above software packages cause incompatibility
+pip install importlib-metadata==6.5.0 # Optional, reinstall if the above software packages cause incompatibility
 ```
 
 ## PostgreSQL
@@ -111,6 +111,25 @@ List all databases.
 # In PostgreSQL shell
 postgres=# \l
 ```
+
+### Configure pgAdmin4
+
+* The email for pgAdmin4 is `admin@admin.com`.
+* The password for pgAdmin4 is `postgres`.
+
+Open browser, go to `http://127.0.0.1/pgadmin4`.
+Click `Add New Server`.
+
+Filled below parameters.
+
+| Category   | Form                 | Value      |
+|------------|----------------------|------------|
+| General    | Name                 | Airflow    |
+| Connection | Host name/address    | localhost  |
+|            | Port                 | 5432       |
+|            | Maintenance database | airflow_db |
+|            | Username             | postgres   |
+|            | Password             | postgres   |
 
 ## MinIO Object Storage for Linux
 
@@ -179,7 +198,21 @@ Already installed via `requirements.txt`.
 ```Shell
 # In venv
 export AIRFLOW_HOME=$(pwd)
-sudo airflow standalone
+airflow standalone
+```
+
+### (Optional) Configure Airflow
+
+Notices: **Please configure Airflow Database Connection after executing Airflow instance once.**
+
+Modify two parameters in the `airflow.cfg` file.
+
+1. load_templates
+
+Set False if you don't load airflow default templates. Default is True.
+
+```text
+load_templates = False
 ```
 
 ### Configure Airflow Database Connection
