@@ -2,7 +2,7 @@
 
 # 一鍵安裝 MinIO Server 和 MinIO Client
 .PHONY: install
-install: install-minio-server install-minio-client
+install: install-minio-server install-minio-client install-postgresql
 
 # 安裝 MinIO Server for Linux
 .PHONY: install-minio-server
@@ -13,6 +13,10 @@ install-minio-server:
 .PHONY: install-minio-client
 install-minio-client:
 	sh ./scripts/install-minio-client.sh
+
+.PHONY: install-postgresql
+install-postgresql:
+	sh ./scripts/install-postgresql.sh
 
 # ===== Run =====
 
