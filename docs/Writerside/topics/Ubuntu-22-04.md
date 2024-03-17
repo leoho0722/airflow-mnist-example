@@ -1,5 +1,39 @@
 # Install on Ubuntu 22.04
 
+**Table of Contents**
+
+- [Build Essentials](#build-essentials)
+    - [Install build essentials](#install-build-essentials)
+- [Python](#python)
+    - [PyPl](#pypi)
+        - [Install PyPl](#install-pypi)
+    - [Virtual Environment](#virtual-environment)
+        - [Install Virtual Environment](#install-virtual-environment)
+        - [Activate Virtual Environment](#activate-virtual-environment)
+        - [Deactivate Virtual Environment](#deactivate-virtual-environment)
+    - [Install Project needed Dependencies](#install-project-needed-dependencies)
+        - [Automatic](#automatic)
+        - [Manual](#manual)
+- [PostgreSQL](#postgresql)
+    - [Install PostgreSQL (Automatic)](#install-postgresql-automatic)
+    - [Install PostgreSQL (Manual)](#install-postgresql-manual)
+    - [Configure PostgreSQL](#configure-postgresql)
+    - [Configure pgAdmin4](#configure-pgadmin4)
+- [MinIO Object Storage for Linux](#minio-object-storage-for-linux)
+    - [MinIO Server](#minio-server)
+        - [Install MinIO Server (Automatic)](#install-minio-server-automatic)
+        - [Install MinIO Server (Manual)](#install-minio-server-manual)
+        - [Running MinIO Server](#running-minio-server)
+    - [MinIO Client](#minio-client)
+        - [Install MinIO Client (Automatic)](#install-minio-client-automatic)
+        - [Install MinIO Client (Manual)](#install-minio-client-manual)
+        - [Configure MinIO Client](#configure-minio-client)
+- [Airflow](#airflow)
+    - [Install Airflow](#install-airflow)
+    - [Running Airflow](#running-airflow)
+    - [(Optional) Configure Airflow](#optional-configure-airflow)
+    - [Configure Airflow Database Connection](#configure-airflow-database-connection)
+
 ## Build Essentials
 
 ### Install build essentials
