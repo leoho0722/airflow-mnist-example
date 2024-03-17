@@ -203,7 +203,7 @@ airflow standalone
 
 ### (Optional) Configure Airflow
 
-Notices: **Please configure Airflow Database Connection after executing Airflow instance once.**
+Notices: **Please configure Airflow after executing Airflow instance once.**
 
 Modify two parameters in the `airflow.cfg` file.
 
