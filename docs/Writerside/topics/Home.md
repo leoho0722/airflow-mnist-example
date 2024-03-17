@@ -2,7 +2,7 @@
 
 ## Contents
 
-* Install
+* [Install](Install.md)
 * [Download MNIST Datasets](#download-mnist-datasets)
 
 ### Download MNIST Datasets
