@@ -1,4 +1,4 @@
-# Install on Ubuntu 22.04
+# Install on Ubuntu 23.10
 
 **Table of Contents**
 
@@ -45,7 +45,7 @@ sudo apt-get install -y build-essential curl
 
 ## Python
 
-Ubuntu 22.04 default Python version is `Python 3.10.12`.
+Ubuntu 23.10 default Python version is `Python 3.11.6`.
 
 ### PyPI
 
@@ -62,14 +62,14 @@ sudo apt-get install -y python3-pip
 
 ```Shell
 sudo apt-get update
-sudo apt-get install -y python3.10-venv
+sudo apt-get install -y python3.11-venv
 ```
 
 #### Activate Virtual Environment
 
 ```Shell
 cd ~
-python3.10 -m venv <venv name>
+python3.11 -m venv <venv name>
 source ~/<venv name>/bin/activate
 ```
 
@@ -126,7 +126,7 @@ Change password of default user `postgres` to `postgres`.
 
 ```Shell
 # In PostgreSQL shell
-postgres=# \password postgres
+postgres=# \password
 ```
 
 Create Database named `airflow_db`.
