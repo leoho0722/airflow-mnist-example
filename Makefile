@@ -33,7 +33,8 @@ config-minio-client:
 
 # 一鍵啟動 Airflow
 .PHONY: run-airflow
-run-airflow: config-airflow-home-env run-airflow-standalone
+run-airflow:
+	sh ./scripts/run-airflow.sh
 
 # 設定 Airflow Home 環境變數
 .PHONY: config-airflow-home-env
