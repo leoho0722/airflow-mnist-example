@@ -1,38 +1,38 @@
-# Install on Ubuntu 20.04
+# Install on Ubuntu 23.10
 
 **Table of Contents**
 
 - [Build Essentials](#build-essentials)
-  - [Install build essentials](#install-build-essentials)
+    - [Install build essentials](#install-build-essentials)
 - [Python](#python)
-  - [PyPl](#pypi)
-    - [Install PyPl](#install-pypi)
-  - [Virtual Environment](#virtual-environment)
-    - [Install Virtual Environment](#install-virtual-environment)
-    - [Activate Virtual Environment](#activate-virtual-environment)
-    - [Deactivate Virtual Environment](#deactivate-virtual-environment)
-  - [Install Project needed Dependencies](#install-project-needed-dependencies)
-    - [Automatic](#automatic)
-    - [Manual](#manual)
+    - [PyPl](#pypi)
+        - [Install PyPl](#install-pypi)
+    - [Virtual Environment](#virtual-environment)
+        - [Install Virtual Environment](#install-virtual-environment)
+        - [Activate Virtual Environment](#activate-virtual-environment)
+        - [Deactivate Virtual Environment](#deactivate-virtual-environment)
+    - [Install Project needed Dependencies](#install-project-needed-dependencies)
+        - [Automatic](#automatic)
+        - [Manual](#manual)
 - [PostgreSQL](#postgresql)
-  - [Install PostgreSQL (Automatic)](#install-postgresql-automatic)
-  - [Install PostgreSQL (Manual)](#install-postgresql-manual)
-  - [Configure PostgreSQL](#configure-postgresql)
-  - [Configure pgAdmin4](#configure-pgadmin4)
+    - [Install PostgreSQL (Automatic)](#install-postgresql-automatic)
+    - [Install PostgreSQL (Manual)](#install-postgresql-manual)
+    - [Configure PostgreSQL](#configure-postgresql)
+    - [Configure pgAdmin4](#configure-pgadmin4)
 - [MinIO Object Storage for Linux](#minio-object-storage-for-linux)
-  - [MinIO Server](#minio-server)
-    - [Install MinIO Server (Automatic)](#install-minio-server-automatic)
-    - [Install MinIO Server (Manual)](#install-minio-server-manual)
-    - [Running MinIO Server](#running-minio-server)
-  - [MinIO Client](#minio-client)
-      - [Install MinIO Client (Automatic)](#install-minio-client-automatic)
-      - [Install MinIO Client (Manual)](#install-minio-client-manual)
-      - [Configure MinIO Client](#configure-minio-client)
+    - [MinIO Server](#minio-server)
+        - [Install MinIO Server (Automatic)](#install-minio-server-automatic)
+        - [Install MinIO Server (Manual)](#install-minio-server-manual)
+        - [Running MinIO Server](#running-minio-server)
+    - [MinIO Client](#minio-client)
+        - [Install MinIO Client (Automatic)](#install-minio-client-automatic)
+        - [Install MinIO Client (Manual)](#install-minio-client-manual)
+        - [Configure MinIO Client](#configure-minio-client)
 - [Airflow](#airflow)
-  - [Install Airflow](#install-airflow)
-  - [Running Airflow](#running-airflow)
-  - [(Optional) Configure Airflow](#optional-configure-airflow)
-  - [Configure Airflow Database Connection](#configure-airflow-database-connection)
+    - [Install Airflow](#install-airflow)
+    - [Running Airflow](#running-airflow)
+    - [(Optional) Configure Airflow](#optional-configure-airflow)
+    - [Configure Airflow Database Connection](#configure-airflow-database-connection)
 
 ## Build Essentials
 
@@ -45,7 +45,7 @@ sudo apt-get install -y build-essential curl
 
 ## Python
 
-Ubuntu 20.04 default Python version is `Python 3.8.10`.
+Ubuntu 23.10 default Python version is `Python 3.11.6`.
 
 ### PyPI
 
@@ -62,14 +62,14 @@ sudo apt-get install -y python3-pip
 
 ```Shell
 sudo apt-get update
-sudo apt-get install -y python3.8-venv
+sudo apt-get install -y python3.11-venv
 ```
 
 #### Activate Virtual Environment
 
 ```Shell
 cd ~
-python3.8 -m venv <venv name>
+python3.11 -m venv <venv name>
 source ~/<venv name>/bin/activate
 ```
 
@@ -85,17 +85,14 @@ deactivate
 
 ```Shell
 # In venv
-pip install -r requirements-py38.txt
+pip install -r requirements-py310.txt
 ```
 
 #### Manual
 
 ```Shell
 # In venv
-pip install tensorflow==2.13.1 apache-airflow==2.8.3 apache-airflow-providers-postgres==5.10.2 minio==7.2.5
-pip install werkzeug==2.2.3 # Optional, reinstall if the above software packages cause incompatibility
-pip install packaging==23.2 # Optional, reinstall if the above software packages cause incompatibility
-pip install importlib-metadata==6.5.0 # Optional, reinstall if the above software packages cause incompatibility
+pip install tensorflow==2.16.1 apache-airflow==2.8.3 apache-airflow-providers-postgres==5.10.2 minio==7.2.5
 ```
 
 ## PostgreSQL

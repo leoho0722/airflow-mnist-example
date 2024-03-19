@@ -126,7 +126,7 @@ Change password of default user `postgres` to `postgres`.
 
 ```Shell
 # In PostgreSQL shell
-postgres=# \password postgres
+postgres=# \password
 ```
 
 Create Database named `airflow_db`.
