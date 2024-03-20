@@ -73,3 +73,7 @@ def prediction_model(model, test_data):
     print()
     print("\t[Info] Show 10 prediction result (From 240):")
     print("%s\n" % (classes_x[240:250]))
+
+
+if __name__ == "__main__":
+    model_evaluate()

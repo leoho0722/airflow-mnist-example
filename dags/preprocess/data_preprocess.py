@@ -48,7 +48,7 @@ def model_data_preprocess():
             object_name=env.MNIST_DATASETS_FILENAME,
             file_path=path
         )
-    
+
     # 進行資料預處理
     X_Train4D_normalize, X_Test4D_normalize, y_TrainOneHot, y_TestOneHot = data_preprocess()
 
@@ -137,3 +137,7 @@ def data_one_hot_encoding(y_train, y_test):
     y_TestOneHot = to_categorical(y_test)
 
     return y_TrainOneHot, y_TestOneHot
+
+
+if __name__ == "__main__":
+    model_data_preprocess()

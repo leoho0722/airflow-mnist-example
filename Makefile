@@ -4,17 +4,16 @@ AUTHOR ?= leoho0722
 IMG ?= airflow-k8s-pod-operator-test
 IMG_TAG ?= latest
 DOCKERFILE_PATH ?= k8s/
-TARGET_PLATFORM ?= linux
-TARGET_ARCH ?= amd64
+TARGET_PLATFORM ?= linux/amd64
 USE_CACHE ?= false
 
-# 一鍵建置 Docker Image，並推送到 Docker Hub
+# 一鍵建置多架構 Docker Image，並推送到 Docker Hub
 .PHONY: build-image
 build-image:
 ifeq ($(USE_CACHE), false)
-	docker build --push --no-cache -f $(DOCKERFILE_PATH) -t $(AUTHOR)/$(IMG):$(IMG_TAG) . --platform $(TARGET_PLATFORM)/$(TARGET_ARCH)
+	docker build --push --no-cache -f $(DOCKERFILE_PATH) -t $(AUTHOR)/$(IMG):$(IMG_TAG) . --platform $(TARGET_PLATFORM)
 else
-	docker build --push -f $(DOCKERFILE_PATH) -t $(AUTHOR)/$(IMG):$(IMG_TAG) . --platform $(TARGET_PLATFORM)/$(TARGET_ARCH)
+	docker build --push -f $(DOCKERFILE_PATH) -t $(AUTHOR)/$(IMG):$(IMG_TAG) . --platform $(TARGET_PLATFORM)
 endif
 
 # ===== Install =====

@@ -159,3 +159,7 @@ def save_trained_model(model, filename: str):
     """
 
     model.save(filename)
+
+
+if __name__ == "__main__":
+    model_training()
