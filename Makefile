@@ -4,7 +4,7 @@ AUTHOR ?= leoho0722
 IMG ?= airflow-k8s-pod-operator-test
 IMG_TAG ?= latest
 DOCKERFILE_PATH ?= k8s/
-TARGET_PLATFORM ?= linux/amd64
+TARGET_PLATFORM ?= linux/amd64,linux/arm64
 USE_CACHE ?= false
 
 # 一鍵建置多架構 Docker Image，並推送到 Docker Hub

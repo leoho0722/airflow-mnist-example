@@ -15,22 +15,31 @@ with DAG(
     preprocessOp = KubernetesPodOperator(
         task_id="mnist-preprocess",
         namespace="default",
-        image="leoho/airflow-preprocess:0.0.1",
+        image="leoho0722/airflow-preprocess:0.0.1",
         name="mnist-preprocess",
+        node_selector={
+            "kubernetes.io/hostname": "ubuntu"
+        }
     )
 
     trainingOp = KubernetesPodOperator(
         task_id="mnist-training",
         namespace="default",
-        image="leoho/airflow-training:0.0.1",
+        image="leoho0722/airflow-training:0.0.1",
         name="mnist-training",
+        node_selector={
+            "kubernetes.io/hostname": "ubuntu"
+        }
     )
 
     evalueateOp = KubernetesPodOperator(
         task_id="mnist-evaluate",
         namespace="default",
-        image="leoho/airflow-evaluate:0.0.1",
+        image="leoho0722/airflow-evaluate:0.0.1",
         name="mnist-evaluate",
+        node_selector={
+            "kubernetes.io/hostname": "ubuntu"
+        }
     )
 
     preprocessOp >> trainingOp >> evalueateOp
