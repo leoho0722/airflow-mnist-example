@@ -1,5 +1,5 @@
 # ===== MinIO Server 設定 =====
-MINIO_API_ENDPOINT = "10.0.0.196:9000"
+MINIO_API_ENDPOINT = "10.20.1.229:9000"
 MINIO_ACCESS_KEY = "minioadmin"
 MINIO_SECRET_KEY = "minioadmin"
 

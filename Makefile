@@ -1,3 +1,22 @@
+# ===== Build =====
+
+AUTHOR ?= leoho0722
+IMG ?= airflow-k8s-pod-operator-test
+IMG_TAG ?= latest
+DOCKERFILE_PATH ?= k8s/
+TARGET_PLATFORM ?= linux
+TARGET_ARCH ?= amd64
+USE_CACHE ?= false
+
+# 一鍵建置 Docker Image，並推送到 Docker Hub
+.PHONY: build-image
+build-image:
+ifeq ($(USE_CACHE), false)
+	docker build --push --no-cache -f $(DOCKERFILE_PATH) -t $(AUTHOR)/$(IMG):$(IMG_TAG) . --platform $(TARGET_PLATFORM)/$(TARGET_ARCH)
+else
+	docker build --push -f $(DOCKERFILE_PATH) -t $(AUTHOR)/$(IMG):$(IMG_TAG) . --platform $(TARGET_PLATFORM)/$(TARGET_ARCH)
+endif
+
 # ===== Install =====
 
 # 一鍵安裝 MinIO Server、MinIO Client、PostgreSQL、pgAdmin4
@@ -36,12 +55,12 @@ config-minio-client:
 run-airflow:
 	sh ./scripts/run-airflow.sh
 
-# 設定 Airflow Home 環境變數
+# (Deprecated) 設定 Airflow Home 環境變數
 .PHONY: config-airflow-home-env
 config-airflow-home-env:
 	export AIRFLOW_HOME=$(pwd)
 
-# 啟動 Airflow Standalone
+# (Deprecated) 啟動 Airflow Standalone
 .PHONY: run-airflow-standalone
 run-airflow-standalone:
 	clear && airflow standalone
