@@ -1,39 +1,54 @@
-from constants import env
-from utils.utils import convert_pkl_to_data
-from utils.minio import client as mc
-from utils.minio import buckets as mc_buckets
+import pickle
 
+from minio import Minio, S3Error
 from keras.layers import Conv2D, Dense, Dropout, Flatten, MaxPool2D
 from keras.models import Sequential
+
+# ===== Constants =====
+
+MNIST_NORMALIZE_BUCKET_NAME = "mnist-normalize"
+MNIST_ONEHOT_ENCODING_BUCKET_NAME = "mnist-onehot-encoding"
+MNIST_TRAINING_MODEL_BUCKET_NAME = "mnist-training-model"
+X_TRAIN4D_NORMALIZE_PKL_FILENAME = "X_Train4D_normalize.pkl"
+Y_TRAIN_ONE_HOT_ENCODING_PKL_FILENAME = "y_Train_One_Hot_Encoding.pkl"
+Y_TEST_ONE_HOT_ENCODING_PKL_FILENAME = "y_TestOneHot.pkl"
+TRAINED_MODEL_KERAS_FILENAME = "trained_model.keras"
+X_TRAIN4D_NORMALIZE_FILE_PATH = f"/src/{X_TRAIN4D_NORMALIZE_PKL_FILENAME}"
+Y_TRAIN_ONE_HOT_ENCODING_FILE_PATH = f"/src/{Y_TRAIN_ONE_HOT_ENCODING_PKL_FILENAME}"
+Y_TEST_ONE_HOT_ENCODING_FILE_PATH = f"/src/{Y_TEST_ONE_HOT_ENCODING_PKL_FILENAME}"
+TRAINED_MODEL_KERAS_FILE_PATH = f"/src/{TRAINED_MODEL_KERAS_FILENAME}"
+MINIO_API_ENDPOINT = "10.20.1.229:9000"
+MINIO_ACCESS_KEY = "minioadmin"
+MINIO_SECRET_KEY = "minioadmin"
 
 
 def model_training():
     # 連接 MinIO Server 並建立 Bucket
-    minioClient = mc.connect_minio()
+    minioClient = connect_minio()
     bucket_names = [
-        env.MNIST_NORMALIZE_BUCKET_NAME,
-        env.MNIST_ONEHOT_ENCODING_BUCKET_NAME,
-        env.MNIST_TRAINING_MODEL_BUCKET_NAME
+        MNIST_NORMALIZE_BUCKET_NAME,
+        MNIST_ONEHOT_ENCODING_BUCKET_NAME,
+        MNIST_TRAINING_MODEL_BUCKET_NAME
     ]
-    mc_buckets.create_buckets(minioClient, bucket_names)
+    create_buckets(minioClient, bucket_names)
 
     # 從 MinIO 取得預處理的資料
-    mc_buckets.get_file_from_bucket(
+    get_file_from_bucket(
         client=minioClient,
-        bucket_name=env.MNIST_NORMALIZE_BUCKET_NAME,
-        object_name=env.X_TRAIN4D_NORMALIZE_PKL_FILENAME,
-        file_path=env.X_TRAIN4D_NORMALIZE_FILE_PATH
+        bucket_name=MNIST_NORMALIZE_BUCKET_NAME,
+        object_name=X_TRAIN4D_NORMALIZE_PKL_FILENAME,
+        file_path=X_TRAIN4D_NORMALIZE_FILE_PATH
     )
     X_Train4D_normalize = convert_pkl_to_data(
-        env.X_TRAIN4D_NORMALIZE_FILE_PATH
+        X_TRAIN4D_NORMALIZE_FILE_PATH
     )
-    mc_buckets.get_file_from_bucket(
+    get_file_from_bucket(
         client=minioClient,
-        bucket_name=env.MNIST_ONEHOT_ENCODING_BUCKET_NAME,
-        object_name=env.Y_TRAIN_ONE_HOT_ENCODING_PKL_FILENAME,
-        file_path=env.Y_TRAIN_ONE_HOT_ENCODING_FILE_PATH
+        bucket_name=MNIST_ONEHOT_ENCODING_BUCKET_NAME,
+        object_name=Y_TRAIN_ONE_HOT_ENCODING_PKL_FILENAME,
+        file_path=Y_TRAIN_ONE_HOT_ENCODING_FILE_PATH
     )
-    y_TrainOneHot = convert_pkl_to_data(env.Y_TRAIN_ONE_HOT_ENCODING_FILE_PATH)
+    y_TrainOneHot = convert_pkl_to_data(Y_TRAIN_ONE_HOT_ENCODING_FILE_PATH)
 
     # 建立模型
     model = model_build()
@@ -44,12 +59,12 @@ def model_training():
                                       onehot_data=y_TrainOneHot)
 
     # 將訓練後的模型資料儲存到 MinIO Bucket
-    save_trained_model(trained_model, env.TRAINED_MODEL_KERAS_FILE_PATH)
-    mc_buckets.upload_file_to_bucket(
+    save_trained_model(trained_model, TRAINED_MODEL_KERAS_FILE_PATH)
+    upload_file_to_bucket(
         client=minioClient,
-        bucket_name=env.MNIST_TRAINING_MODEL_BUCKET_NAME,
-        object_name=env.TRAINED_MODEL_KERAS_FILENAME,
-        file_path=env.TRAINED_MODEL_KERAS_FILE_PATH
+        bucket_name=MNIST_TRAINING_MODEL_BUCKET_NAME,
+        object_name=TRAINED_MODEL_KERAS_FILENAME,
+        file_path=TRAINED_MODEL_KERAS_FILE_PATH
     )
 
 
@@ -159,6 +174,127 @@ def save_trained_model(model, filename: str):
     """
 
     model.save(filename)
+
+
+# ===== Utils =====
+
+
+def convert_pkl_to_data(filename: str):
+    """將 pkl 檔案轉換回原始資料
+
+    Args:
+        filename (str): pkl 檔案名稱
+    """
+
+    with open(filename, 'rb') as f:
+        data = pickle.load(f)
+    return data
+
+
+def write_file(filename: str, data):
+    """將模型資料寫入檔案
+
+    Args:
+        filename (str): 檔案名稱
+        data: 要寫入的資料
+    """
+
+    with open(filename, 'wb') as f:
+        pickle.dump(data, f)
+
+
+def connect_minio():
+    """連接 MinIO Server"""
+
+    return Minio(
+        endpoint=MINIO_API_ENDPOINT,
+        access_key=MINIO_ACCESS_KEY,
+        secret_key=MINIO_SECRET_KEY,
+        secure=False
+    )
+
+
+def create_buckets(client: Minio, bucket_names: list):
+    """建立 MinIO Bucket
+
+    Args:
+        client (Minio): Minio Client instance
+        bucket_names (list): 要建立的 MinIO Bucket 名稱
+    """
+
+    print(f"bucket_names: {bucket_names}")
+    for name in bucket_names:
+        if client.bucket_exists(name):
+            print(f"Bucket {name} already exists")
+        else:
+            client.make_bucket(name)
+            print(f"Bucket {name} created")
+
+
+def get_file_from_bucket(
+    client: Minio,
+    bucket_name: str,
+    object_name: str,
+    file_path: str
+):
+    """取得 MinIO Bucket 內的資料
+
+    Args:
+        client (Minio): MinIO Client instance
+        bucket_name (str): MinIO Bucket 名稱
+        object_name (str): 要取得的 object 名稱
+        file_path (str): 下載後的檔案路徑
+    """
+
+    client.fget_object(bucket_name, object_name, file_path)
+
+
+def upload_file_to_bucket(
+    client: Minio,
+    bucket_name: str,
+    object_name: str,
+    file_path: str
+):
+    """上傳資料到 MinIO Bucket 內
+
+    Args:
+        client (Minio): MinIO Client instance
+        bucket_name (str): MinIO Bucket 名稱
+        object_name (str): 要上傳到 MinIO Bucket 的 object 名稱
+        filename (object): 要上傳到 MinIO Bucket 的檔案名稱
+    """
+
+    try:
+        client.fput_object(bucket_name=bucket_name,
+                           object_name=object_name,
+                           file_path=file_path)
+    except S3Error as err:
+        print(
+            f"upload file {file_path} to minio bucket {bucket_name} occurs error. Error: {err}"
+        )
+
+
+def object_exists(
+    client: Minio,
+    bucket_name: str,
+    object_name: str
+):
+    """確認 MinIO Bucket 內是否存在指定的 object
+
+    Args:
+        client (Minio): MinIO Client instance
+        bucket_name (str): MinIO Bucket 名稱
+        object_name (str): 要確認是否存在於 MinIO Bucket 的 object 名稱
+    """
+
+    try:
+        client.stat_object(bucket_name=bucket_name, object_name=object_name)
+        return True
+    except:
+        return False
+
+
+# ===== Main =====
 
 
 if __name__ == "__main__":

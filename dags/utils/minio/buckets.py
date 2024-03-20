@@ -60,7 +60,20 @@ def upload_file_to_bucket(
             f"upload file {file_path} to minio bucket {bucket_name} occurs error. Error: {err}"
         )
 
-def object_exists(client: Minio, bucket_name: str, object_name: str):
+
+def object_exists(
+    client: Minio,
+    bucket_name: str,
+    object_name: str
+):
+    """確認 MinIO Bucket 內是否存在指定的 object
+
+    Args:
+        client (Minio): MinIO Client instance
+        bucket_name (str): MinIO Bucket 名稱
+        object_name (str): 要確認是否存在於 MinIO Bucket 的 object 名稱
+    """
+
     try:
         client.stat_object(bucket_name=bucket_name, object_name=object_name)
         return True

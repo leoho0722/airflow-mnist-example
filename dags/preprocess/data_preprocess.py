@@ -1,51 +1,71 @@
-from constants import env
-from utils.utils import write_file
-from utils.minio import client as mc
-from utils.minio import buckets as mc_buckets
+import pickle
 
-import numpy as np
 from keras.utils import to_categorical, get_file
+from minio import Minio, S3Error
+import numpy as np
+
+# ===== Constants =====
+
+
+MNIST_DATASETS_BUCKET_NAME = "mnist-datasets"
+MNIST_NORMALIZE_BUCKET_NAME = "mnist-normalize"
+MNIST_ONEHOT_ENCODING_BUCKET_NAME = "mnist-onehot-encoding"
+MNIST_DATASETS_FILENAME = "mnist.npz"
+X_TRAIN4D_NORMALIZE_PKL_FILENAME = "X_Train4D_normalize.pkl"
+X_TEST4D_NORMALIZE_PKL_FILENAME = "X_Test4D_normalize.pkl"
+Y_TRAIN_ONE_HOT_ENCODING_PKL_FILENAME = "y_Train_One_Hot_Encoding.pkl"
+Y_TEST_ONE_HOT_ENCODING_PKL_FILENAME = "y_TestOneHot.pkl"
+MNIST_PARENT_DIR = "/src"
+MNIST_DATASETS_DIR = f"/src/datasets"
+MNIST_DATASETS_FILE_PATH = f"/src/{MNIST_DATASETS_FILENAME}"
+X_TRAIN4D_NORMALIZE_FILE_PATH = f"/src/{X_TRAIN4D_NORMALIZE_PKL_FILENAME}"
+X_TEST4D_NORMALIZE_FILE_PATH = f"/src/{X_TEST4D_NORMALIZE_PKL_FILENAME}"
+Y_TRAIN_ONE_HOT_ENCODING_FILE_PATH = f"/src/{Y_TRAIN_ONE_HOT_ENCODING_PKL_FILENAME}"
+Y_TEST_ONE_HOT_ENCODING_FILE_PATH = f"/src/{Y_TEST_ONE_HOT_ENCODING_PKL_FILENAME}"
+MINIO_API_ENDPOINT = "10.20.1.229:9000"
+MINIO_ACCESS_KEY = "minioadmin"
+MINIO_SECRET_KEY = "minioadmin"
 
 
 def model_data_preprocess():
     # 連接 MinIO Server 並建立 Bucket
-    minioClient = mc.connect_minio()
+    minioClient = connect_minio()
     bucket_names = [
-        env.MNIST_DATASETS_BUCKET_NAME,
-        env.MNIST_NORMALIZE_BUCKET_NAME,
-        env.MNIST_ONEHOT_ENCODING_BUCKET_NAME
+        MNIST_DATASETS_BUCKET_NAME,
+        MNIST_NORMALIZE_BUCKET_NAME,
+        MNIST_ONEHOT_ENCODING_BUCKET_NAME
     ]
-    mc_buckets.create_buckets(minioClient, bucket_names)
+    create_buckets(minioClient, bucket_names)
 
-    is_datasets_exists = mc_buckets.object_exists(
+    is_datasets_exists = object_exists(
         client=minioClient,
-        bucket_name=env.MNIST_DATASETS_BUCKET_NAME,
-        object_name=env.MNIST_DATASETS_FILENAME
+        bucket_name=MNIST_DATASETS_BUCKET_NAME,
+        object_name=MNIST_DATASETS_FILENAME
     )
 
     if is_datasets_exists:
         print("MNIST datasets exists.")
-        mc_buckets.get_file_from_bucket(
+        get_file_from_bucket(
             client=minioClient,
-            bucket_name=env.MNIST_DATASETS_BUCKET_NAME,
-            object_name=env.MNIST_DATASETS_FILENAME,
-            file_path=env.MNIST_DATASETS_FILE_PATH
+            bucket_name=MNIST_DATASETS_BUCKET_NAME,
+            object_name=MNIST_DATASETS_FILENAME,
+            file_path=MNIST_DATASETS_FILE_PATH
         )
     else:
         print("MNIST datasets doesn't exist. download...")
         # 從 MinIO 下載 MNIST 資料集
         # https://storage.googleapis.com/tensorflow/tf-keras-datasets/mnist.npz
         path = get_file(
-            fname=env.MNIST_DATASETS_FILENAME,
+            fname=MNIST_DATASETS_FILENAME,
             origin='https://storage.googleapis.com/tensorflow/tf-keras-datasets/mnist.npz',
             file_hash="731c5ac602752760c8e48fbffcf8c3b850d9dc2a2aedcf2cc48468fc17b673d1",
-            cache_dir=env.MNIST_PARENT_DIR,
-            cache_subdir=env.MNIST_DATASETS_DIR
+            cache_dir=MNIST_PARENT_DIR,
+            cache_subdir=MNIST_DATASETS_DIR
         )
-        mc_buckets.upload_file_to_bucket(
+        upload_file_to_bucket(
             client=minioClient,
-            bucket_name=env.MNIST_DATASETS_BUCKET_NAME,
-            object_name=env.MNIST_DATASETS_FILENAME,
+            bucket_name=MNIST_DATASETS_BUCKET_NAME,
+            object_name=MNIST_DATASETS_FILENAME,
             file_path=path
         )
 
@@ -53,37 +73,37 @@ def model_data_preprocess():
     X_Train4D_normalize, X_Test4D_normalize, y_TrainOneHot, y_TestOneHot = data_preprocess()
 
     # 將資料儲存成 pkl 檔案
-    write_file(env.X_TRAIN4D_NORMALIZE_FILE_PATH, X_Train4D_normalize)
-    write_file(env.X_TEST4D_NORMALIZE_FILE_PATH, X_Test4D_normalize)
-    write_file(env.Y_TRAIN_ONE_HOT_ENCODING_FILE_PATH, y_TrainOneHot)
-    write_file(env.Y_TEST_ONE_HOT_ENCODING_FILE_PATH, y_TestOneHot)
+    write_file(X_TRAIN4D_NORMALIZE_FILE_PATH, X_Train4D_normalize)
+    write_file(X_TEST4D_NORMALIZE_FILE_PATH, X_Test4D_normalize)
+    write_file(Y_TRAIN_ONE_HOT_ENCODING_FILE_PATH, y_TrainOneHot)
+    write_file(Y_TEST_ONE_HOT_ENCODING_FILE_PATH, y_TestOneHot)
 
     # 將檔案儲存 MinIO Bucket
     # normalize
-    mc_buckets.upload_file_to_bucket(
+    upload_file_to_bucket(
         client=minioClient,
-        bucket_name=env.MNIST_NORMALIZE_BUCKET_NAME,
-        object_name=env.X_TRAIN4D_NORMALIZE_PKL_FILENAME,
-        file_path=env.X_TRAIN4D_NORMALIZE_FILE_PATH
+        bucket_name=MNIST_NORMALIZE_BUCKET_NAME,
+        object_name=X_TRAIN4D_NORMALIZE_PKL_FILENAME,
+        file_path=X_TRAIN4D_NORMALIZE_FILE_PATH
     )
-    mc_buckets.upload_file_to_bucket(
+    upload_file_to_bucket(
         client=minioClient,
-        bucket_name=env.MNIST_NORMALIZE_BUCKET_NAME,
-        object_name=env.X_TEST4D_NORMALIZE_PKL_FILENAME,
-        file_path=env.X_TEST4D_NORMALIZE_FILE_PATH
+        bucket_name=MNIST_NORMALIZE_BUCKET_NAME,
+        object_name=X_TEST4D_NORMALIZE_PKL_FILENAME,
+        file_path=X_TEST4D_NORMALIZE_FILE_PATH
     )
     # onehot encoding
-    mc_buckets.upload_file_to_bucket(
+    upload_file_to_bucket(
         client=minioClient,
-        bucket_name=env.MNIST_ONEHOT_ENCODING_BUCKET_NAME,
-        object_name=env.Y_TRAIN_ONE_HOT_ENCODING_PKL_FILENAME,
-        file_path=env.Y_TRAIN_ONE_HOT_ENCODING_FILE_PATH
+        bucket_name=MNIST_ONEHOT_ENCODING_BUCKET_NAME,
+        object_name=Y_TRAIN_ONE_HOT_ENCODING_PKL_FILENAME,
+        file_path=Y_TRAIN_ONE_HOT_ENCODING_FILE_PATH
     )
-    mc_buckets.upload_file_to_bucket(
+    upload_file_to_bucket(
         client=minioClient,
-        bucket_name=env.MNIST_ONEHOT_ENCODING_BUCKET_NAME,
-        object_name=env.Y_TEST_ONE_HOT_ENCODING_PKL_FILENAME,
-        file_path=env.Y_TEST_ONE_HOT_ENCODING_FILE_PATH
+        bucket_name=MNIST_ONEHOT_ENCODING_BUCKET_NAME,
+        object_name=Y_TEST_ONE_HOT_ENCODING_PKL_FILENAME,
+        file_path=Y_TEST_ONE_HOT_ENCODING_FILE_PATH
     )
 
 
@@ -93,7 +113,7 @@ def data_preprocess():
     np.random.seed(10)
 
     # 讀取 MNIST 資料集
-    with np.load(env.MNIST_DATASETS_FILE_PATH) as f:
+    with np.load(MNIST_DATASETS_FILE_PATH) as f:
         X_train, y_train = f['x_train'], f['y_train']
         X_test, y_test = f['x_test'], f['y_test']
 
@@ -137,6 +157,115 @@ def data_one_hot_encoding(y_train, y_test):
     y_TestOneHot = to_categorical(y_test)
 
     return y_TrainOneHot, y_TestOneHot
+
+
+# ===== Utils =====
+
+
+def write_file(filename: str, data):
+    """將模型資料寫入檔案
+
+    Args:
+        filename (str): 檔案名稱
+        data: 要寫入的資料
+    """
+
+    with open(filename, 'wb') as f:
+        pickle.dump(data, f)
+
+
+def connect_minio():
+    """連接 MinIO Server"""
+
+    return Minio(
+        endpoint=MINIO_API_ENDPOINT,
+        access_key=MINIO_ACCESS_KEY,
+        secret_key=MINIO_SECRET_KEY,
+        secure=False
+    )
+
+
+def create_buckets(client: Minio, bucket_names: list):
+    """建立 MinIO Bucket
+
+    Args:
+        client (Minio): Minio Client instance
+        bucket_names (list): 要建立的 MinIO Bucket 名稱
+    """
+
+    print(f"bucket_names: {bucket_names}")
+    for name in bucket_names:
+        if client.bucket_exists(name):
+            print(f"Bucket {name} already exists")
+        else:
+            client.make_bucket(name)
+            print(f"Bucket {name} created")
+
+
+def get_file_from_bucket(
+    client: Minio,
+    bucket_name: str,
+    object_name: str,
+    file_path: str
+):
+    """取得 MinIO Bucket 內的資料
+
+    Args:
+        client (Minio): MinIO Client instance
+        bucket_name (str): MinIO Bucket 名稱
+        object_name (str): 要取得的 object 名稱
+        file_path (str): 下載後的檔案路徑
+    """
+
+    client.fget_object(bucket_name, object_name, file_path)
+
+
+def upload_file_to_bucket(
+    client: Minio,
+    bucket_name: str,
+    object_name: str,
+    file_path: str
+):
+    """上傳資料到 MinIO Bucket 內
+
+    Args:
+        client (Minio): MinIO Client instance
+        bucket_name (str): MinIO Bucket 名稱
+        object_name (str): 要上傳到 MinIO Bucket 的 object 名稱
+        filename (object): 要上傳到 MinIO Bucket 的檔案名稱
+    """
+
+    try:
+        client.fput_object(bucket_name=bucket_name,
+                           object_name=object_name,
+                           file_path=file_path)
+    except S3Error as err:
+        print(
+            f"upload file {file_path} to minio bucket {bucket_name} occurs error. Error: {err}"
+        )
+
+
+def object_exists(
+    client: Minio,
+    bucket_name: str,
+    object_name: str
+):
+    """確認 MinIO Bucket 內是否存在指定的 object
+
+    Args:
+        client (Minio): MinIO Client instance
+        bucket_name (str): MinIO Bucket 名稱
+        object_name (str): 要確認是否存在於 MinIO Bucket 的 object 名稱
+    """
+
+    try:
+        client.stat_object(bucket_name=bucket_name, object_name=object_name)
+        return True
+    except:
+        return False
+
+
+# ===== Main =====
 
 
 if __name__ == "__main__":

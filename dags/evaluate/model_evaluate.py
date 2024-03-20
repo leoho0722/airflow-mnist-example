@@ -1,40 +1,53 @@
-from constants import env
-from utils.utils import convert_pkl_to_data
-from utils.minio import client as mc
-from utils.minio import buckets as mc_buckets
-
+import pickle
 import keras
+from minio import Minio
 import numpy as np
+
+
+# ===== Constants =====
+
+MNIST_NORMALIZE_BUCKET_NAME = "mnist-normalize"
+MNIST_ONEHOT_ENCODING_BUCKET_NAME = "mnist-onehot-encoding"
+MNIST_TRAINING_MODEL_BUCKET_NAME = "mnist-training-model"
+X_TEST4D_NORMALIZE_PKL_FILENAME = "X_Test4D_normalize.pkl"
+Y_TEST_ONE_HOT_ENCODING_PKL_FILENAME = "y_TestOneHot.pkl"
+TRAINED_MODEL_KERAS_FILENAME = "trained_model.keras"
+X_TEST4D_NORMALIZE_FILE_PATH = f"/src/{X_TEST4D_NORMALIZE_PKL_FILENAME}"
+Y_TEST_ONE_HOT_ENCODING_FILE_PATH = f"/src/{Y_TEST_ONE_HOT_ENCODING_PKL_FILENAME}"
+TRAINED_MODEL_KERAS_FILE_PATH = f"/src/{TRAINED_MODEL_KERAS_FILENAME}"
+MINIO_API_ENDPOINT = "10.20.1.229:9000"
+MINIO_ACCESS_KEY = "minioadmin"
+MINIO_SECRET_KEY = "minioadmin"
 
 
 def model_evaluate():
     # 連接 MinIO Server 並建立 Bucket
-    minioClient = mc.connect_minio()
+    minioClient = connect_minio()
 
     # 從 MinIO 取得訓練後的模型資料，並轉換回 keras 模型
-    mc_buckets.get_file_from_bucket(
+    get_file_from_bucket(
         client=minioClient,
-        bucket_name=env.MNIST_TRAINING_MODEL_BUCKET_NAME,
-        object_name=env.TRAINED_MODEL_KERAS_FILENAME,
-        file_path=env.TRAINED_MODEL_KERAS_FILE_PATH
+        bucket_name=MNIST_TRAINING_MODEL_BUCKET_NAME,
+        object_name=TRAINED_MODEL_KERAS_FILENAME,
+        file_path=TRAINED_MODEL_KERAS_FILE_PATH
     )
-    model = keras.models.load_model(env.TRAINED_MODEL_KERAS_FILE_PATH)
+    model = keras.models.load_model(TRAINED_MODEL_KERAS_FILE_PATH)
 
     # 從 MinIO 取得測試資料集
-    mc_buckets.get_file_from_bucket(
+    get_file_from_bucket(
         client=minioClient,
-        bucket_name=env.MNIST_NORMALIZE_BUCKET_NAME,
-        object_name=env.X_TEST4D_NORMALIZE_PKL_FILENAME,
-        file_path=env.X_TEST4D_NORMALIZE_FILE_PATH
+        bucket_name=MNIST_NORMALIZE_BUCKET_NAME,
+        object_name=X_TEST4D_NORMALIZE_PKL_FILENAME,
+        file_path=X_TEST4D_NORMALIZE_FILE_PATH
     )
-    X_Test4D_normalize = convert_pkl_to_data(env.X_TEST4D_NORMALIZE_FILE_PATH)
-    mc_buckets.get_file_from_bucket(
+    X_Test4D_normalize = convert_pkl_to_data(X_TEST4D_NORMALIZE_FILE_PATH)
+    get_file_from_bucket(
         client=minioClient,
-        bucket_name=env.MNIST_ONEHOT_ENCODING_BUCKET_NAME,
-        object_name=env.Y_TEST_ONE_HOT_ENCODING_PKL_FILENAME,
-        file_path=env.Y_TEST_ONE_HOT_ENCODING_FILE_PATH
+        bucket_name=MNIST_ONEHOT_ENCODING_BUCKET_NAME,
+        object_name=Y_TEST_ONE_HOT_ENCODING_PKL_FILENAME,
+        file_path=Y_TEST_ONE_HOT_ENCODING_FILE_PATH
     )
-    y_TestOneHot = convert_pkl_to_data(env.Y_TEST_ONE_HOT_ENCODING_FILE_PATH)
+    y_TestOneHot = convert_pkl_to_data(Y_TEST_ONE_HOT_ENCODING_FILE_PATH)
 
     # 評估模型
     evaluate_model(model, X_Test4D_normalize, y_TestOneHot)
@@ -73,6 +86,53 @@ def prediction_model(model, test_data):
     print()
     print("\t[Info] Show 10 prediction result (From 240):")
     print("%s\n" % (classes_x[240:250]))
+
+
+# ===== Utils =====
+
+
+def convert_pkl_to_data(filename: str):
+    """將 pkl 檔案轉換回原始資料
+
+    Args:
+        filename (str): pkl 檔案名稱
+    """
+
+    with open(filename, 'rb') as f:
+        data = pickle.load(f)
+    return data
+
+
+def connect_minio():
+    """連接 MinIO Server"""
+
+    return Minio(
+        endpoint=MINIO_API_ENDPOINT,
+        access_key=MINIO_ACCESS_KEY,
+        secret_key=MINIO_SECRET_KEY,
+        secure=False
+    )
+
+
+def get_file_from_bucket(
+    client: Minio,
+    bucket_name: str,
+    object_name: str,
+    file_path: str
+):
+    """取得 MinIO Bucket 內的資料
+
+    Args:
+        client (Minio): MinIO Client instance
+        bucket_name (str): MinIO Bucket 名稱
+        object_name (str): 要取得的 object 名稱
+        file_path (str): 下載後的檔案路徑
+    """
+
+    client.fget_object(bucket_name, object_name, file_path)
+
+
+# ===== Main =====
 
 
 if __name__ == "__main__":

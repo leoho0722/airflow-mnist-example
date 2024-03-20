@@ -3,8 +3,6 @@ FROM --platform=$TARGETPLATFORM python:3.10.13-slim
 WORKDIR /src
 
 COPY dags/preprocess /src/preprocess
-COPY dags/constants /src/constants
-COPY dags/utils /src/utils
 
 RUN pip install tensorflow minio
 
