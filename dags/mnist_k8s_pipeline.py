@@ -17,6 +17,8 @@ with DAG(
         namespace="default",
         image="leoho0722/airflow-preprocess:0.0.2-k8s",
         name="mnist-preprocess",
+        startup_timeout_seconds=1200,
+        image_pull_policy="IfNotPresent",
         # node_selector={
         #     "kubernetes.io/hostname": "ubuntu"
         # }
@@ -27,6 +29,8 @@ with DAG(
         namespace="default",
         image="leoho0722/airflow-training:0.0.2-k8s",
         name="mnist-training",
+        startup_timeout_seconds=1200,
+        image_pull_policy="IfNotPresent",
         # node_selector={
         #     "kubernetes.io/hostname": "ubuntu"
         # }
@@ -37,6 +41,8 @@ with DAG(
         namespace="default",
         image="leoho0722/airflow-evaluate:0.0.2-k8s",
         name="mnist-evaluate",
+        startup_timeout_seconds=1200,
+        image_pull_policy="IfNotPresent",
         # node_selector={
         #     "kubernetes.io/hostname": "ubuntu"
         # }
