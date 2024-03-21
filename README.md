@@ -1,5 +1,7 @@
 # airflow-mnist-example
 
+**Below is deprecated.** Please refer to the [Documentation](./docs/Writerside/topics/Home.md) for the latest installation instructions.
+
 ## Environment Install
 
 ### MNIST CNN Model Datasets
