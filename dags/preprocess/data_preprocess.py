@@ -10,18 +10,23 @@ import numpy as np
 MNIST_DATASETS_BUCKET_NAME = "mnist-datasets"
 MNIST_NORMALIZE_BUCKET_NAME = "mnist-normalize"
 MNIST_ONEHOT_ENCODING_BUCKET_NAME = "mnist-onehot-encoding"
+
 MNIST_DATASETS_FILENAME = "mnist.npz"
+
 X_TRAIN4D_NORMALIZE_PKL_FILENAME = "X_Train4D_normalize.pkl"
 X_TEST4D_NORMALIZE_PKL_FILENAME = "X_Test4D_normalize.pkl"
 Y_TRAIN_ONE_HOT_ENCODING_PKL_FILENAME = "y_Train_One_Hot_Encoding.pkl"
 Y_TEST_ONE_HOT_ENCODING_PKL_FILENAME = "y_TestOneHot.pkl"
+
 MNIST_PARENT_DIR = "/src"
 MNIST_DATASETS_DIR = f"/src/datasets"
+
 MNIST_DATASETS_FILE_PATH = f"/src/{MNIST_DATASETS_FILENAME}"
 X_TRAIN4D_NORMALIZE_FILE_PATH = f"/src/{X_TRAIN4D_NORMALIZE_PKL_FILENAME}"
 X_TEST4D_NORMALIZE_FILE_PATH = f"/src/{X_TEST4D_NORMALIZE_PKL_FILENAME}"
 Y_TRAIN_ONE_HOT_ENCODING_FILE_PATH = f"/src/{Y_TRAIN_ONE_HOT_ENCODING_PKL_FILENAME}"
 Y_TEST_ONE_HOT_ENCODING_FILE_PATH = f"/src/{Y_TEST_ONE_HOT_ENCODING_PKL_FILENAME}"
+
 MINIO_API_ENDPOINT = "10.20.1.229:9000"
 MINIO_ACCESS_KEY = "minioadmin"
 MINIO_SECRET_KEY = "minioadmin"
@@ -30,12 +35,12 @@ MINIO_SECRET_KEY = "minioadmin"
 def model_data_preprocess():
     # 連接 MinIO Server 並建立 Bucket
     minioClient = connect_minio()
-    bucket_names = [
-        MNIST_DATASETS_BUCKET_NAME,
-        MNIST_NORMALIZE_BUCKET_NAME,
-        MNIST_ONEHOT_ENCODING_BUCKET_NAME
-    ]
-    create_buckets(minioClient, bucket_names)
+    # bucket_names = [
+    #     MNIST_DATASETS_BUCKET_NAME,
+    #     MNIST_NORMALIZE_BUCKET_NAME,
+    #     MNIST_ONEHOT_ENCODING_BUCKET_NAME
+    # ]
+    # create_buckets(minioClient, bucket_names)
 
     is_datasets_exists = object_exists(
         client=minioClient,
@@ -51,23 +56,23 @@ def model_data_preprocess():
             object_name=MNIST_DATASETS_FILENAME,
             file_path=MNIST_DATASETS_FILE_PATH
         )
-    else:
-        print("MNIST datasets doesn't exist. download...")
-        # 從 MinIO 下載 MNIST 資料集
-        # https://storage.googleapis.com/tensorflow/tf-keras-datasets/mnist.npz
-        path = get_file(
-            fname=MNIST_DATASETS_FILENAME,
-            origin='https://storage.googleapis.com/tensorflow/tf-keras-datasets/mnist.npz',
-            file_hash="731c5ac602752760c8e48fbffcf8c3b850d9dc2a2aedcf2cc48468fc17b673d1",
-            cache_dir=MNIST_PARENT_DIR,
-            cache_subdir=MNIST_DATASETS_DIR
-        )
-        upload_file_to_bucket(
-            client=minioClient,
-            bucket_name=MNIST_DATASETS_BUCKET_NAME,
-            object_name=MNIST_DATASETS_FILENAME,
-            file_path=path
-        )
+    # else:
+    #     print("MNIST datasets doesn't exist. download...")
+    #     # 從 MinIO 下載 MNIST 資料集
+    #     # https://storage.googleapis.com/tensorflow/tf-keras-datasets/mnist.npz
+    #     path = get_file(
+    #         fname=MNIST_DATASETS_FILENAME,
+    #         origin='https://storage.googleapis.com/tensorflow/tf-keras-datasets/mnist.npz',
+    #         file_hash="731c5ac602752760c8e48fbffcf8c3b850d9dc2a2aedcf2cc48468fc17b673d1",
+    #         cache_dir=MNIST_PARENT_DIR,
+    #         cache_subdir=MNIST_DATASETS_DIR
+    #     )
+    #     upload_file_to_bucket(
+    #         client=minioClient,
+    #         bucket_name=MNIST_DATASETS_BUCKET_NAME,
+    #         object_name=MNIST_DATASETS_FILENAME,
+    #         file_path=path
+    #     )
 
     # 進行資料預處理
     X_Train4D_normalize, X_Test4D_normalize, y_TrainOneHot, y_TestOneHot = data_preprocess()

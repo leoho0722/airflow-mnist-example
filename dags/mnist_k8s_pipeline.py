@@ -12,13 +12,25 @@ with DAG(
     default_args=default_args,
     start_date=datetime(2024, 3, 20),
 ):
+    bucketsCreateOp = KubernetesPodOperator(
+        task_id="mnist-buckets-create",
+        namespace="default",
+        image="leoho0722/airflow-buckets-create:0.0.2-k8s",
+        name="mnist-buckets-create",
+        startup_timeout_seconds=1200,
+        image_pull_policy="Always",
+        # node_selector={
+        #     "kubernetes.io/hostname": "ubuntu"
+        # }
+    )
+
     preprocessOp = KubernetesPodOperator(
         task_id="mnist-preprocess",
         namespace="default",
         image="leoho0722/airflow-preprocess:0.0.2-k8s",
         name="mnist-preprocess",
         startup_timeout_seconds=1200,
-        image_pull_policy="IfNotPresent",
+        image_pull_policy="Always",
         # node_selector={
         #     "kubernetes.io/hostname": "ubuntu"
         # }
@@ -30,7 +42,7 @@ with DAG(
         image="leoho0722/airflow-training:0.0.2-k8s",
         name="mnist-training",
         startup_timeout_seconds=1200,
-        image_pull_policy="IfNotPresent",
+        image_pull_policy="Always",
         # node_selector={
         #     "kubernetes.io/hostname": "ubuntu"
         # }
@@ -42,10 +54,10 @@ with DAG(
         image="leoho0722/airflow-evaluate:0.0.2-k8s",
         name="mnist-evaluate",
         startup_timeout_seconds=1200,
-        image_pull_policy="IfNotPresent",
+        image_pull_policy="Always",
         # node_selector={
         #     "kubernetes.io/hostname": "ubuntu"
         # }
     )
 
-    preprocessOp >> trainingOp >> evalueateOp
+    bucketsCreateOp >> preprocessOp >> trainingOp >> evalueateOp
