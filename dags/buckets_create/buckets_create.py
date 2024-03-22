@@ -1,12 +1,14 @@
+import os
+
 from keras.utils import get_file
 from minio import Minio
 
 
 # ===== Constants =====
 
-MINIO_API_ENDPOINT = "10.20.1.229:9000"
-MINIO_ACCESS_KEY = "minioadmin"
-MINIO_SECRET_KEY = "minioadmin"
+MINIO_API_ENDPOINT = os.environ["MINIO_API_ENDPOINT"]  # 10.20.1.229:9000
+MINIO_ACCESS_KEY = os.environ["MINIO_ACCESS_KEY"]  # minioadmin
+MINIO_SECRET_KEY = os.environ["MINIO_SECRET_KEY"]  # minioadmin
 
 MNIST_DATASETS_BUCKET_NAME = "mnist-datasets"
 MNIST_NORMALIZE_BUCKET_NAME = "mnist-normalize"

@@ -1,11 +1,15 @@
+import os
 import pickle
 
-from keras.utils import to_categorical, get_file
+from keras.utils import to_categorical
 from minio import Minio, S3Error
 import numpy as np
 
 # ===== Constants =====
 
+MINIO_API_ENDPOINT = os.environ["MINIO_API_ENDPOINT"]  # 10.20.1.229:9000
+MINIO_ACCESS_KEY = os.environ["MINIO_ACCESS_KEY"]  # minioadmin
+MINIO_SECRET_KEY = os.environ["MINIO_SECRET_KEY"]  # minioadmin
 
 MNIST_DATASETS_BUCKET_NAME = "mnist-datasets"
 MNIST_NORMALIZE_BUCKET_NAME = "mnist-normalize"
@@ -26,10 +30,6 @@ X_TRAIN4D_NORMALIZE_FILE_PATH = f"/src/{X_TRAIN4D_NORMALIZE_PKL_FILENAME}"
 X_TEST4D_NORMALIZE_FILE_PATH = f"/src/{X_TEST4D_NORMALIZE_PKL_FILENAME}"
 Y_TRAIN_ONE_HOT_ENCODING_FILE_PATH = f"/src/{Y_TRAIN_ONE_HOT_ENCODING_PKL_FILENAME}"
 Y_TEST_ONE_HOT_ENCODING_FILE_PATH = f"/src/{Y_TEST_ONE_HOT_ENCODING_PKL_FILENAME}"
-
-MINIO_API_ENDPOINT = "10.20.1.229:9000"
-MINIO_ACCESS_KEY = "minioadmin"
-MINIO_SECRET_KEY = "minioadmin"
 
 
 def model_data_preprocess():

@@ -1,10 +1,15 @@
+import os
 import pickle
 
-from minio import Minio, S3Error
 from keras.layers import Conv2D, Dense, Dropout, Flatten, MaxPool2D
 from keras.models import Sequential
+from minio import Minio, S3Error
 
 # ===== Constants =====
+
+MINIO_API_ENDPOINT = os.environ["MINIO_API_ENDPOINT"]  # 10.20.1.229:9000
+MINIO_ACCESS_KEY = os.environ["MINIO_ACCESS_KEY"]  # minioadmin
+MINIO_SECRET_KEY = os.environ["MINIO_SECRET_KEY"]  # minioadmin
 
 MNIST_NORMALIZE_BUCKET_NAME = "mnist-normalize"
 MNIST_ONEHOT_ENCODING_BUCKET_NAME = "mnist-onehot-encoding"
@@ -20,10 +25,6 @@ X_TRAIN4D_NORMALIZE_FILE_PATH = f"/src/{X_TRAIN4D_NORMALIZE_PKL_FILENAME}"
 Y_TRAIN_ONE_HOT_ENCODING_FILE_PATH = f"/src/{Y_TRAIN_ONE_HOT_ENCODING_PKL_FILENAME}"
 Y_TEST_ONE_HOT_ENCODING_FILE_PATH = f"/src/{Y_TEST_ONE_HOT_ENCODING_PKL_FILENAME}"
 TRAINED_MODEL_KERAS_FILE_PATH = f"/src/{TRAINED_MODEL_KERAS_FILENAME}"
-
-MINIO_API_ENDPOINT = "10.20.1.229:9000"
-MINIO_ACCESS_KEY = "minioadmin"
-MINIO_SECRET_KEY = "minioadmin"
 
 
 def model_training():

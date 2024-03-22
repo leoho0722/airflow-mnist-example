@@ -19,6 +19,11 @@ with DAG(
         name="mnist-buckets-create",
         startup_timeout_seconds=1200,
         image_pull_policy="Always",
+        env_vars={
+            "MINIO_API_ENDPOINT": "10.20.1.229:9000",
+            "MINIO_ACCESS_KEY": "minioadmin",
+            "MINIO_SECRET_KEY": "miniadmin",
+        },
         # node_selector={
         #     "kubernetes.io/hostname": "ubuntu"
         # }
@@ -31,6 +36,11 @@ with DAG(
         name="mnist-preprocess",
         startup_timeout_seconds=1200,
         image_pull_policy="Always",
+        env_vars={
+            "MINIO_API_ENDPOINT": "10.20.1.229:9000",
+            "MINIO_ACCESS_KEY": "minioadmin",
+            "MINIO_SECRET_KEY": "miniadmin",
+        },
         # node_selector={
         #     "kubernetes.io/hostname": "ubuntu"
         # }
@@ -43,6 +53,11 @@ with DAG(
         name="mnist-training",
         startup_timeout_seconds=1200,
         image_pull_policy="Always",
+        env_vars={
+            "MINIO_API_ENDPOINT": "10.20.1.229:9000",
+            "MINIO_ACCESS_KEY": "minioadmin",
+            "MINIO_SECRET_KEY": "miniadmin",
+        },
         # node_selector={
         #     "kubernetes.io/hostname": "ubuntu"
         # }
@@ -55,6 +70,11 @@ with DAG(
         name="mnist-evaluate",
         startup_timeout_seconds=1200,
         image_pull_policy="Always",
+        env_vars={
+            "MINIO_API_ENDPOINT": "10.20.1.229:9000",
+            "MINIO_ACCESS_KEY": "minioadmin",
+            "MINIO_SECRET_KEY": "miniadmin",
+        },
         # node_selector={
         #     "kubernetes.io/hostname": "ubuntu"
         # }
