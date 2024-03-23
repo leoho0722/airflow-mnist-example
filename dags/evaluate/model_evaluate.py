@@ -1,6 +1,5 @@
 import os
 import pickle
-
 import keras
 from minio import Minio
 import numpy as np
@@ -28,11 +27,11 @@ TRAINED_MODEL_KERAS_FILE_PATH = f"/src/{TRAINED_MODEL_KERAS_FILENAME}"
 
 def model_evaluate():
     # 連接 MinIO Server 並建立 Bucket
-    minioClient = connect_minio()
+    minio_client = connect_minio()
 
     # 從 MinIO 取得訓練後的模型資料，並轉換回 keras 模型
     get_file_from_bucket(
-        client=minioClient,
+        client=minio_client,
         bucket_name=MNIST_TRAINING_MODEL_BUCKET_NAME,
         object_name=TRAINED_MODEL_KERAS_FILENAME,
         file_path=TRAINED_MODEL_KERAS_FILE_PATH
@@ -41,25 +40,33 @@ def model_evaluate():
 
     # 從 MinIO 取得測試資料集
     get_file_from_bucket(
-        client=minioClient,
+        client=minio_client,
         bucket_name=MNIST_NORMALIZE_BUCKET_NAME,
         object_name=X_TEST4D_NORMALIZE_PKL_FILENAME,
         file_path=X_TEST4D_NORMALIZE_FILE_PATH
     )
-    X_Test4D_normalize = convert_pkl_to_data(X_TEST4D_NORMALIZE_FILE_PATH)
+    X_Test4D_normalize = convert_pkl_to_data(
+        filename=X_TEST4D_NORMALIZE_FILE_PATH
+    )
     get_file_from_bucket(
-        client=minioClient,
+        client=minio_client,
         bucket_name=MNIST_ONEHOT_ENCODING_BUCKET_NAME,
         object_name=Y_TEST_ONE_HOT_ENCODING_PKL_FILENAME,
         file_path=Y_TEST_ONE_HOT_ENCODING_FILE_PATH
     )
-    y_TestOneHot = convert_pkl_to_data(Y_TEST_ONE_HOT_ENCODING_FILE_PATH)
+    y_TestOneHot = convert_pkl_to_data(
+        filename=Y_TEST_ONE_HOT_ENCODING_FILE_PATH
+    )
 
     # 評估模型
-    evaluate_model(model, X_Test4D_normalize, y_TestOneHot)
+    evaluate_model(
+        model=model,
+        test_data=X_Test4D_normalize,
+        test_label=y_TestOneHot
+    )
 
     # 預測模型
-    prediction_model(model, X_Test4D_normalize)
+    prediction_model(model=model, test_data=X_Test4D_normalize)
 
 
 def evaluate_model(model, test_data, test_label):

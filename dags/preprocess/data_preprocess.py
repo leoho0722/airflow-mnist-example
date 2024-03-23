@@ -1,6 +1,5 @@
 import os
 import pickle
-
 from keras.utils import to_categorical
 from minio import Minio, S3Error
 import numpy as np
@@ -34,16 +33,10 @@ Y_TEST_ONE_HOT_ENCODING_FILE_PATH = f"/src/{Y_TEST_ONE_HOT_ENCODING_PKL_FILENAME
 
 def model_data_preprocess():
     # 連接 MinIO Server 並建立 Bucket
-    minioClient = connect_minio()
-    # bucket_names = [
-    #     MNIST_DATASETS_BUCKET_NAME,
-    #     MNIST_NORMALIZE_BUCKET_NAME,
-    #     MNIST_ONEHOT_ENCODING_BUCKET_NAME
-    # ]
-    # create_buckets(minioClient, bucket_names)
+    minio_client = connect_minio()
 
     is_datasets_exists = object_exists(
-        client=minioClient,
+        client=minio_client,
         bucket_name=MNIST_DATASETS_BUCKET_NAME,
         object_name=MNIST_DATASETS_FILENAME
     )
@@ -51,28 +44,11 @@ def model_data_preprocess():
     if is_datasets_exists:
         print("MNIST datasets exists.")
         get_file_from_bucket(
-            client=minioClient,
+            client=minio_client,
             bucket_name=MNIST_DATASETS_BUCKET_NAME,
             object_name=MNIST_DATASETS_FILENAME,
             file_path=MNIST_DATASETS_FILE_PATH
         )
-    # else:
-    #     print("MNIST datasets doesn't exist. download...")
-    #     # 從 MinIO 下載 MNIST 資料集
-    #     # https://storage.googleapis.com/tensorflow/tf-keras-datasets/mnist.npz
-    #     path = get_file(
-    #         fname=MNIST_DATASETS_FILENAME,
-    #         origin='https://storage.googleapis.com/tensorflow/tf-keras-datasets/mnist.npz',
-    #         file_hash="731c5ac602752760c8e48fbffcf8c3b850d9dc2a2aedcf2cc48468fc17b673d1",
-    #         cache_dir=MNIST_PARENT_DIR,
-    #         cache_subdir=MNIST_DATASETS_DIR
-    #     )
-    #     upload_file_to_bucket(
-    #         client=minioClient,
-    #         bucket_name=MNIST_DATASETS_BUCKET_NAME,
-    #         object_name=MNIST_DATASETS_FILENAME,
-    #         file_path=path
-    #     )
 
     # 進行資料預處理
     X_Train4D_normalize, X_Test4D_normalize, y_TrainOneHot, y_TestOneHot = data_preprocess()
@@ -86,26 +62,26 @@ def model_data_preprocess():
     # 將檔案儲存 MinIO Bucket
     # normalize
     upload_file_to_bucket(
-        client=minioClient,
+        client=minio_client,
         bucket_name=MNIST_NORMALIZE_BUCKET_NAME,
         object_name=X_TRAIN4D_NORMALIZE_PKL_FILENAME,
         file_path=X_TRAIN4D_NORMALIZE_FILE_PATH
     )
     upload_file_to_bucket(
-        client=minioClient,
+        client=minio_client,
         bucket_name=MNIST_NORMALIZE_BUCKET_NAME,
         object_name=X_TEST4D_NORMALIZE_PKL_FILENAME,
         file_path=X_TEST4D_NORMALIZE_FILE_PATH
     )
     # onehot encoding
     upload_file_to_bucket(
-        client=minioClient,
+        client=minio_client,
         bucket_name=MNIST_ONEHOT_ENCODING_BUCKET_NAME,
         object_name=Y_TRAIN_ONE_HOT_ENCODING_PKL_FILENAME,
         file_path=Y_TRAIN_ONE_HOT_ENCODING_FILE_PATH
     )
     upload_file_to_bucket(
-        client=minioClient,
+        client=minio_client,
         bucket_name=MNIST_ONEHOT_ENCODING_BUCKET_NAME,
         object_name=Y_TEST_ONE_HOT_ENCODING_PKL_FILENAME,
         file_path=Y_TEST_ONE_HOT_ENCODING_FILE_PATH
@@ -241,9 +217,11 @@ def upload_file_to_bucket(
     """
 
     try:
-        client.fput_object(bucket_name=bucket_name,
-                           object_name=object_name,
-                           file_path=file_path)
+        client.fput_object(
+            bucket_name=bucket_name,
+            object_name=object_name,
+            file_path=file_path
+        )
     except S3Error as err:
         print(
             f"upload file {file_path} to minio bucket {bucket_name} occurs error. Error: {err}"

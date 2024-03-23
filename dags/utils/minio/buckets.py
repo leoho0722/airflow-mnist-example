@@ -33,7 +33,11 @@ def get_file_from_bucket(
         file_path (str): 下載後的檔案路徑
     """
 
-    client.fget_object(bucket_name, object_name, file_path)
+    client.fget_object(
+        bucket_name=bucket_name,
+        object_name=object_name,
+        file_path=file_path
+    )
 
 
 def upload_file_to_bucket(
@@ -52,9 +56,11 @@ def upload_file_to_bucket(
     """
 
     try:
-        client.fput_object(bucket_name=bucket_name,
-                           object_name=object_name,
-                           file_path=file_path)
+        client.fput_object(
+            bucket_name=bucket_name,
+            object_name=object_name,
+            file_path=file_path
+        )
     except S3Error as err:
         print(
             f"upload file {file_path} to minio bucket {bucket_name} occurs error. Error: {err}"
