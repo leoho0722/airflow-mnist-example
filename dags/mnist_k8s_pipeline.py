@@ -15,7 +15,7 @@ with DAG(
     bucketsCreateOp = KubernetesPodOperator(
         task_id="mnist-buckets-create",
         namespace="default",
-        image="leoho0722/airflow-buckets-create:0.0.2-k8s",
+        image="leoho0722/airflow-buckets-create:0.0.3-k8s",
         name="mnist-buckets-create",
         startup_timeout_seconds=1200,
         image_pull_policy="Always",
@@ -32,7 +32,7 @@ with DAG(
     preprocessOp = KubernetesPodOperator(
         task_id="mnist-preprocess",
         namespace="default",
-        image="leoho0722/airflow-preprocess:0.0.2-k8s",
+        image="leoho0722/airflow-preprocess:0.0.3-k8s",
         name="mnist-preprocess",
         startup_timeout_seconds=1200,
         image_pull_policy="Always",
@@ -49,7 +49,7 @@ with DAG(
     trainingOp = KubernetesPodOperator(
         task_id="mnist-training",
         namespace="default",
-        image="leoho0722/airflow-training:0.0.2-k8s",
+        image="leoho0722/airflow-training:0.0.3-k8s",
         name="mnist-training",
         startup_timeout_seconds=1200,
         image_pull_policy="Always",
@@ -66,7 +66,7 @@ with DAG(
     evalueateOp = KubernetesPodOperator(
         task_id="mnist-evaluate",
         namespace="default",
-        image="leoho0722/airflow-evaluate:0.0.2-k8s",
+        image="leoho0722/airflow-evaluate:0.0.3-k8s",
         name="mnist-evaluate",
         startup_timeout_seconds=1200,
         image_pull_policy="Always",
