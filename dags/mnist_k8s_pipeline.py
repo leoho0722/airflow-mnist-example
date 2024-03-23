@@ -22,7 +22,7 @@ with DAG(
         env_vars={
             "MINIO_API_ENDPOINT": "10.20.1.229:9000",
             "MINIO_ACCESS_KEY": "minioadmin",
-            "MINIO_SECRET_KEY": "miniadmin",
+            "MINIO_SECRET_KEY": "minioadmin",
         },
         # node_selector={
         #     "kubernetes.io/hostname": "ubuntu"
@@ -39,7 +39,7 @@ with DAG(
         env_vars={
             "MINIO_API_ENDPOINT": "10.20.1.229:9000",
             "MINIO_ACCESS_KEY": "minioadmin",
-            "MINIO_SECRET_KEY": "miniadmin",
+            "MINIO_SECRET_KEY": "minioadmin",
         },
         # node_selector={
         #     "kubernetes.io/hostname": "ubuntu"
@@ -56,7 +56,7 @@ with DAG(
         env_vars={
             "MINIO_API_ENDPOINT": "10.20.1.229:9000",
             "MINIO_ACCESS_KEY": "minioadmin",
-            "MINIO_SECRET_KEY": "miniadmin",
+            "MINIO_SECRET_KEY": "minioadmin",
         },
         # node_selector={
         #     "kubernetes.io/hostname": "ubuntu"
@@ -73,7 +73,7 @@ with DAG(
         env_vars={
             "MINIO_API_ENDPOINT": "10.20.1.229:9000",
             "MINIO_ACCESS_KEY": "minioadmin",
-            "MINIO_SECRET_KEY": "miniadmin",
+            "MINIO_SECRET_KEY": "minioadmin",
         },
         # node_selector={
         #     "kubernetes.io/hostname": "ubuntu"
