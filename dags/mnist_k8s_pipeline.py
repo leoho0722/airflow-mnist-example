@@ -11,6 +11,18 @@ with DAG(
     default_args=default_args,
     start_date=datetime(2024, 3, 20),
 ):
+    check_gpu_op = KubernetesPodOperator(
+        task_id="check-gpu",
+        namespace="default",
+        image="leoho0722/airflow-check-gpu:0.0.3-k8s",
+        name="check-gpu",
+        startup_timeout_seconds=1200,
+        image_pull_policy="Always",
+        # node_selector={
+        #     "kubernetes.io/hostname": "ubuntu"
+        # }
+    )
+
     buckets_create_op = KubernetesPodOperator(
         task_id="mnist-buckets-create",
         namespace="default",
@@ -79,4 +91,4 @@ with DAG(
         # }
     )
 
-    buckets_create_op >> preprocess_op >> training_op >> evaluate_op
+    check_gpu_op >> buckets_create_op >> preprocess_op >> training_op >> evaluate_op
