@@ -160,10 +160,11 @@ def training_model(model, normalize_data, onehot_data):
                   metrics=['accuracy'])
 
     # 開始訓練
+    training_epochs = os.environ["TRAINING_EPOCHS"]  # 10
     train_result = model.fit(x=normalize_data,
                              y=onehot_data,
                              validation_split=0.2,
-                             epochs=10,
+                             epochs=int(training_epochs),
                              batch_size=300,
                              verbose=1)
 
