@@ -1,5 +1,4 @@
 from datetime import datetime
-
 from airflow import DAG
 from airflow.providers.cncf.kubernetes.operators.kubernetes_pod import KubernetesPodOperator
 
@@ -12,7 +11,19 @@ with DAG(
     default_args=default_args,
     start_date=datetime(2024, 3, 20),
 ):
-    bucketsCreateOp = KubernetesPodOperator(
+    check_gpu_op = KubernetesPodOperator(
+        task_id="check-gpu",
+        namespace="default",
+        image="leoho0722/airflow-check-gpu:0.0.3-k8s",
+        name="check-gpu",
+        startup_timeout_seconds=1200,
+        image_pull_policy="Always",
+        # node_selector={
+        #     "kubernetes.io/hostname": "ubuntu"
+        # }
+    )
+
+    buckets_create_op = KubernetesPodOperator(
         task_id="mnist-buckets-create",
         namespace="default",
         image="leoho0722/airflow-buckets-create:0.0.3-k8s",
@@ -29,7 +40,7 @@ with DAG(
         # }
     )
 
-    preprocessOp = KubernetesPodOperator(
+    preprocess_op = KubernetesPodOperator(
         task_id="mnist-preprocess",
         namespace="default",
         image="leoho0722/airflow-preprocess:0.0.3-k8s",
@@ -46,7 +57,7 @@ with DAG(
         # }
     )
 
-    trainingOp = KubernetesPodOperator(
+    training_op = KubernetesPodOperator(
         task_id="mnist-training",
         namespace="default",
         image="leoho0722/airflow-training:0.0.3-k8s",
@@ -64,7 +75,7 @@ with DAG(
         # }
     )
 
-    evalueateOp = KubernetesPodOperator(
+    evaluate_op = KubernetesPodOperator(
         task_id="mnist-evaluate",
         namespace="default",
         image="leoho0722/airflow-evaluate:0.0.3-k8s",
@@ -81,4 +92,4 @@ with DAG(
         # }
     )
 
-    bucketsCreateOp >> preprocessOp >> trainingOp >> evalueateOp
+    check_gpu_op >> buckets_create_op >> preprocess_op >> training_op >> evaluate_op

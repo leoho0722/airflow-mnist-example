@@ -1,6 +1,5 @@
-from constants import env
-
 from minio import Minio
+from constants import env
 
 
 def connect_minio():

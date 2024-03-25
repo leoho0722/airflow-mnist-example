@@ -1,5 +1,4 @@
 import os
-
 from keras.utils import get_file
 from minio import Minio
 
@@ -18,9 +17,9 @@ MNIST_TRAINING_MODEL_BUCKET_NAME = "mnist-training-model"
 MNIST_DATASETS_FILENAME = "mnist.npz"
 
 MNIST_PARENT_DIR = "/src"
-MNIST_DATASETS_DIR = f"/src/datasets"
+MNIST_DATASETS_DIR = f"{MNIST_PARENT_DIR}/datasets"
 
-MNIST_DATASETS_FILE_PATH = f"/src/{MNIST_DATASETS_FILENAME}"
+MNIST_DATASETS_FILE_PATH = f"{MNIST_PARENT_DIR}/{MNIST_DATASETS_FILENAME}"
 
 
 def download_mnist_datasets(client: Minio):
@@ -120,7 +119,11 @@ def upload_file_to_bucket(
         file_path (str): 要上傳的檔案路徑
     """
 
-    client.fput_object(bucket_name, object_name, file_path)
+    client.fput_object(
+        bucket_name=bucket_name,
+        object_name=object_name,
+        file_path=file_path
+    )
 
 
 # ===== Main =====

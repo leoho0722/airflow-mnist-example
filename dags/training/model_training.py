@@ -1,6 +1,5 @@
 import os
 import pickle
-
 from keras.layers import Conv2D, Dense, Dropout, Flatten, MaxPool2D
 from keras.models import Sequential
 from minio import Minio, S3Error
@@ -29,17 +28,11 @@ TRAINED_MODEL_KERAS_FILE_PATH = f"/src/{TRAINED_MODEL_KERAS_FILENAME}"
 
 def model_training():
     # 連接 MinIO Server 並建立 Bucket
-    minioClient = connect_minio()
-    bucket_names = [
-        MNIST_NORMALIZE_BUCKET_NAME,
-        MNIST_ONEHOT_ENCODING_BUCKET_NAME,
-        MNIST_TRAINING_MODEL_BUCKET_NAME
-    ]
-    create_buckets(minioClient, bucket_names)
+    minio_client = connect_minio()
 
     # 從 MinIO 取得預處理的資料
     get_file_from_bucket(
-        client=minioClient,
+        client=minio_client,
         bucket_name=MNIST_NORMALIZE_BUCKET_NAME,
         object_name=X_TRAIN4D_NORMALIZE_PKL_FILENAME,
         file_path=X_TRAIN4D_NORMALIZE_FILE_PATH
@@ -48,25 +41,32 @@ def model_training():
         X_TRAIN4D_NORMALIZE_FILE_PATH
     )
     get_file_from_bucket(
-        client=minioClient,
+        client=minio_client,
         bucket_name=MNIST_ONEHOT_ENCODING_BUCKET_NAME,
         object_name=Y_TRAIN_ONE_HOT_ENCODING_PKL_FILENAME,
         file_path=Y_TRAIN_ONE_HOT_ENCODING_FILE_PATH
     )
-    y_TrainOneHot = convert_pkl_to_data(Y_TRAIN_ONE_HOT_ENCODING_FILE_PATH)
+    y_TrainOneHot = convert_pkl_to_data(
+        filename=Y_TRAIN_ONE_HOT_ENCODING_FILE_PATH
+    )
 
     # 建立模型
     model = model_build()
 
     # 訓練模型
-    trained_model, _ = training_model(model=model,
-                                      normalize_data=X_Train4D_normalize,
-                                      onehot_data=y_TrainOneHot)
+    trained_model, _ = training_model(
+        model=model,
+        normalize_data=X_Train4D_normalize,
+        onehot_data=y_TrainOneHot
+    )
 
     # 將訓練後的模型資料儲存到 MinIO Bucket
-    save_trained_model(trained_model, TRAINED_MODEL_KERAS_FILE_PATH)
+    save_trained_model(
+        model=trained_model,
+        filename=TRAINED_MODEL_KERAS_FILE_PATH
+    )
     upload_file_to_bucket(
-        client=minioClient,
+        client=minio_client,
         bucket_name=MNIST_TRAINING_MODEL_BUCKET_NAME,
         object_name=TRAINED_MODEL_KERAS_FILENAME,
         file_path=TRAINED_MODEL_KERAS_FILE_PATH
@@ -161,12 +161,14 @@ def training_model(model, normalize_data, onehot_data):
 
     # 開始訓練
     training_epochs = os.environ["TRAINING_EPOCHS"]  # 10
-    train_result = model.fit(x=normalize_data,
-                             y=onehot_data,
-                             validation_split=0.2,
-                             epochs=int(training_epochs),
-                             batch_size=300,
-                             verbose=1)
+    train_result = model.fit(
+        x=normalize_data,
+        y=onehot_data,
+        validation_split=0.2,
+        epochs=int(training_epochs),
+        batch_size=300,
+        verbose=1
+    )
 
     return model, train_result
 
@@ -252,7 +254,11 @@ def get_file_from_bucket(
         file_path (str): 下載後的檔案路徑
     """
 
-    client.fget_object(bucket_name, object_name, file_path)
+    client.fget_object(
+        bucket_name=bucket_name,
+        object_name=object_name,
+        file_path=file_path
+    )
 
 
 def upload_file_to_bucket(
@@ -271,9 +277,11 @@ def upload_file_to_bucket(
     """
 
     try:
-        client.fput_object(bucket_name=bucket_name,
-                           object_name=object_name,
-                           file_path=file_path)
+        client.fput_object(
+            bucket_name=bucket_name,
+            object_name=object_name,
+            file_path=file_path
+        )
     except S3Error as err:
         print(
             f"upload file {file_path} to minio bucket {bucket_name} occurs error. Error: {err}"
