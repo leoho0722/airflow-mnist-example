@@ -1,6 +1,6 @@
 import os
 import pickle
-import keras
+from keras.models import load_model
 from minio import Minio
 import numpy as np
 
@@ -36,7 +36,7 @@ def model_evaluate():
         object_name=TRAINED_MODEL_KERAS_FILENAME,
         file_path=TRAINED_MODEL_KERAS_FILE_PATH
     )
-    model = keras.models.load_model(TRAINED_MODEL_KERAS_FILE_PATH)
+    model = load_model(TRAINED_MODEL_KERAS_FILE_PATH)
 
     # 從 MinIO 取得測試資料集
     get_file_from_bucket(

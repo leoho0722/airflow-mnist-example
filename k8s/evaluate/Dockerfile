@@ -1,10 +1,9 @@
-FROM --platform=$TARGETPLATFORM python:3.10.13-slim
+FROM tensorflow/tensorflow:2.14.0
 
 WORKDIR /src
 
 COPY dags/evaluate/model_evaluate.py /src/evaluate/model_evaluate.py
-COPY k8s/requirements.txt /src/requirements.txt
 
-RUN pip install -r /src/requirements.txt
+RUN pip install minio
 
 CMD ["python", "/src/evaluate/model_evaluate.py"]

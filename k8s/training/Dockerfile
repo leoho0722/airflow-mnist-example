@@ -1,3 +1,4 @@
+# Use the GPU version image of TensorFlow, supports CUDA >= 11.8
 FROM tensorflow/tensorflow:2.14.0-gpu
 
 WORKDIR /src
