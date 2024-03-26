@@ -1,6 +1,7 @@
 from datetime import datetime
 from airflow import DAG
 from airflow.providers.cncf.kubernetes.operators.kubernetes_pod import KubernetesPodOperator
+from kubernetes.client.models.v1_resource_requirements import V1ResourceRequirements
 
 default_args = {
     'owner': 'Leo Ho',
@@ -11,17 +12,15 @@ with DAG(
     default_args=default_args,
     start_date=datetime(2024, 3, 20),
 ):
-    check_gpu_op = KubernetesPodOperator(
-        task_id="check-gpu",
-        namespace="default",
-        image="leoho0722/airflow-check-gpu:0.0.3-k8s",
-        name="check-gpu",
-        startup_timeout_seconds=1200,
-        image_pull_policy="Always",
-        # node_selector={
-        #     "kubernetes.io/hostname": "ubuntu"
-        # }
-    )
+    env_vars = {
+        "MINIO_API_ENDPOINT": "10.20.1.229:9000",
+        "MINIO_ACCESS_KEY": "minioadmin",
+        "MINIO_SECRET_KEY": "minioadmin",
+    }
+    training_env_vars = env_vars | {"TRAINING_EPOCHS": "10"}
+    node_selector = {
+        "kubernetes.io/hostname": "3070ti"
+    }
 
     buckets_create_op = KubernetesPodOperator(
         task_id="mnist-buckets-create",
@@ -30,14 +29,13 @@ with DAG(
         name="mnist-buckets-create",
         startup_timeout_seconds=1200,
         image_pull_policy="Always",
-        env_vars={
-            "MINIO_API_ENDPOINT": "10.20.1.229:9000",
-            "MINIO_ACCESS_KEY": "minioadmin",
-            "MINIO_SECRET_KEY": "minioadmin",
-        },
-        # node_selector={
-        #     "kubernetes.io/hostname": "ubuntu"
-        # }
+        # env_vars={
+        #     "MINIO_API_ENDPOINT": "10.20.1.229:9000",
+        #     "MINIO_ACCESS_KEY": "minioadmin",
+        #     "MINIO_SECRET_KEY": "minioadmin",
+        # },
+        env_vars=env_vars,
+        node_selector=node_selector
     )
 
     preprocess_op = KubernetesPodOperator(
@@ -47,32 +45,38 @@ with DAG(
         name="mnist-preprocess",
         startup_timeout_seconds=1200,
         image_pull_policy="Always",
-        env_vars={
-            "MINIO_API_ENDPOINT": "10.20.1.229:9000",
-            "MINIO_ACCESS_KEY": "minioadmin",
-            "MINIO_SECRET_KEY": "minioadmin",
-        },
-        # node_selector={
-        #     "kubernetes.io/hostname": "ubuntu"
-        # }
+        # env_vars={
+        #     "MINIO_API_ENDPOINT": "10.20.1.229:9000",
+        #     "MINIO_ACCESS_KEY": "minioadmin",
+        #     "MINIO_SECRET_KEY": "minioadmin",
+        # },
+        env_vars=env_vars,
+        node_selector=node_selector
     )
 
     training_op = KubernetesPodOperator(
         task_id="mnist-training",
         namespace="default",
-        image="leoho0722/airflow-training:0.0.3-k8s",
+        image="leoho0722/airflow-training:0.0.3-k8s-gpu",
         name="mnist-training",
         startup_timeout_seconds=1200,
         image_pull_policy="Always",
-        env_vars={
-            "MINIO_API_ENDPOINT": "10.20.1.229:9000",
-            "MINIO_ACCESS_KEY": "minioadmin",
-            "MINIO_SECRET_KEY": "minioadmin",
-            "TRAINING_EPOCHS": "10"
-        },
-        # node_selector={
-        #     "kubernetes.io/hostname": "ubuntu"
-        # }
+        # env_vars={
+        #     "MINIO_API_ENDPOINT": "10.20.1.229:9000",
+        #     "MINIO_ACCESS_KEY": "minioadmin",
+        #     "MINIO_SECRET_KEY": "minioadmin",
+        #     "TRAINING_EPOCHS": "10"
+        # },
+        env_vars=training_env_vars,
+        container_resources=V1ResourceRequirements(
+            limits={
+                "nvidia.com/gpu": 1
+            },
+            requests={
+                "nvidia.com/gpu": 1
+            },
+        ),
+        node_selector=node_selector
     )
 
     evaluate_op = KubernetesPodOperator(
@@ -82,14 +86,13 @@ with DAG(
         name="mnist-evaluate",
         startup_timeout_seconds=1200,
         image_pull_policy="Always",
-        env_vars={
-            "MINIO_API_ENDPOINT": "10.20.1.229:9000",
-            "MINIO_ACCESS_KEY": "minioadmin",
-            "MINIO_SECRET_KEY": "minioadmin",
-        },
-        # node_selector={
-        #     "kubernetes.io/hostname": "ubuntu"
-        # }
+        # env_vars={
+        #     "MINIO_API_ENDPOINT": "10.20.1.229:9000",
+        #     "MINIO_ACCESS_KEY": "minioadmin",
+        #     "MINIO_SECRET_KEY": "minioadmin",
+        # },
+        env_vars=env_vars,
+        node_selector=node_selector
     )
 
-    check_gpu_op >> buckets_create_op >> preprocess_op >> training_op >> evaluate_op
+    buckets_create_op >> preprocess_op >> training_op >> evaluate_op

@@ -1,0 +1,9 @@
+FROM tensorflow/tensorflow:2.16.1-gpu
+
+WORKDIR /src
+
+COPY dags/training/model_training.py /src/training/model_training.py
+
+RUN pip install minio
+
+CMD ["python", "/src/training/model_training.py"]
