@@ -1,10 +1,9 @@
-FROM --platform=$TARGETPLATFORM python:3.10.13-slim
+FROM tensorflow/tensorflow:2.14.0-gpu
 
 WORKDIR /src
 
 COPY dags/training/model_training.py /src/training/model_training.py
-COPY k8s/requirements.txt /src/requirements.txt
 
-RUN pip install -r /src/requirements.txt
+RUN pip install minio
 
 CMD ["python", "/src/training/model_training.py"]

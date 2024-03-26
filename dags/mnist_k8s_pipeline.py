@@ -13,11 +13,11 @@ with DAG(
     start_date=datetime(2024, 3, 20),
 ):
     env_vars = {
-        "MINIO_API_ENDPOINT": "10.20.1.229:9000",
+        "MINIO_API_ENDPOINT": "10.0.0.196:9000",
         "MINIO_ACCESS_KEY": "minioadmin",
         "MINIO_SECRET_KEY": "minioadmin",
+        "TRAINING_EPOCHS": "10"
     }
-    training_env_vars = env_vars | {"TRAINING_EPOCHS": "10"}
     node_selector = {
         "kubernetes.io/hostname": "3070ti"
     }
@@ -29,11 +29,6 @@ with DAG(
         name="mnist-buckets-create",
         startup_timeout_seconds=1200,
         image_pull_policy="Always",
-        # env_vars={
-        #     "MINIO_API_ENDPOINT": "10.20.1.229:9000",
-        #     "MINIO_ACCESS_KEY": "minioadmin",
-        #     "MINIO_SECRET_KEY": "minioadmin",
-        # },
         env_vars=env_vars,
         node_selector=node_selector
     )
@@ -45,11 +40,6 @@ with DAG(
         name="mnist-preprocess",
         startup_timeout_seconds=1200,
         image_pull_policy="Always",
-        # env_vars={
-        #     "MINIO_API_ENDPOINT": "10.20.1.229:9000",
-        #     "MINIO_ACCESS_KEY": "minioadmin",
-        #     "MINIO_SECRET_KEY": "minioadmin",
-        # },
         env_vars=env_vars,
         node_selector=node_selector
     )
@@ -61,13 +51,7 @@ with DAG(
         name="mnist-training",
         startup_timeout_seconds=1200,
         image_pull_policy="Always",
-        # env_vars={
-        #     "MINIO_API_ENDPOINT": "10.20.1.229:9000",
-        #     "MINIO_ACCESS_KEY": "minioadmin",
-        #     "MINIO_SECRET_KEY": "minioadmin",
-        #     "TRAINING_EPOCHS": "10"
-        # },
-        env_vars=training_env_vars,
+        env_vars=env_vars,
         container_resources=V1ResourceRequirements(
             limits={
                 "nvidia.com/gpu": 1
@@ -86,11 +70,6 @@ with DAG(
         name="mnist-evaluate",
         startup_timeout_seconds=1200,
         image_pull_policy="Always",
-        # env_vars={
-        #     "MINIO_API_ENDPOINT": "10.20.1.229:9000",
-        #     "MINIO_ACCESS_KEY": "minioadmin",
-        #     "MINIO_SECRET_KEY": "minioadmin",
-        # },
         env_vars=env_vars,
         node_selector=node_selector
     )

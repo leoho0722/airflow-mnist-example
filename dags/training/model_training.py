@@ -3,6 +3,7 @@ import pickle
 from keras.layers import Conv2D, Dense, Dropout, Flatten, MaxPool2D
 from keras.models import Sequential
 from minio import Minio, S3Error
+import tensorflow as tf
 
 # ===== Constants =====
 
@@ -24,6 +25,17 @@ X_TRAIN4D_NORMALIZE_FILE_PATH = f"/src/{X_TRAIN4D_NORMALIZE_PKL_FILENAME}"
 Y_TRAIN_ONE_HOT_ENCODING_FILE_PATH = f"/src/{Y_TRAIN_ONE_HOT_ENCODING_PKL_FILENAME}"
 Y_TEST_ONE_HOT_ENCODING_FILE_PATH = f"/src/{Y_TEST_ONE_HOT_ENCODING_PKL_FILENAME}"
 TRAINED_MODEL_KERAS_FILE_PATH = f"/src/{TRAINED_MODEL_KERAS_FILENAME}"
+
+
+def check_gpu():
+    """檢查是否有 GPU 可用"""
+
+    physical_devices = tf.config.experimental.list_physical_devices('GPU')
+    if len(physical_devices) == 0:
+        print("Not enough GPU hardware devices available")
+
+    print(f"Found {len(physical_devices)} GPU hardware devices available")
+    print(f"GPU model: {tf.test.gpu_device_name()}")
 
 
 def model_training():
@@ -312,4 +324,5 @@ def object_exists(
 
 
 if __name__ == "__main__":
+    check_gpu()
     model_training()
