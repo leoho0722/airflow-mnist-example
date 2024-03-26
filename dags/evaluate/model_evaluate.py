@@ -3,7 +3,7 @@ import pickle
 from keras.models import load_model
 from minio import Minio
 import numpy as np
-
+# from tensorflow.python.keras.saving.save import load_model
 
 # ===== Constants =====
 
@@ -19,10 +19,16 @@ X_TEST4D_NORMALIZE_PKL_FILENAME = "X_Test4D_normalize.pkl"
 Y_TEST_ONE_HOT_ENCODING_PKL_FILENAME = "y_TestOneHot.pkl"
 
 TRAINED_MODEL_KERAS_FILENAME = "trained_model.keras"
+FINGERPRINT_PB_FILENAME = "fingerprint.pb"
+SAVED_MODEL_PB_FILENAME = "saved_model.pb"
+KERAS_METADATA_PB_FILENAME = "keras_metadata.pb"
+ASSETS_FILENAME = "assets"
+VARIABLES_FILENAME = "variables"
 
 X_TEST4D_NORMALIZE_FILE_PATH = f"/src/{X_TEST4D_NORMALIZE_PKL_FILENAME}"
 Y_TEST_ONE_HOT_ENCODING_FILE_PATH = f"/src/{Y_TEST_ONE_HOT_ENCODING_PKL_FILENAME}"
 TRAINED_MODEL_KERAS_FILE_PATH = f"/src/{TRAINED_MODEL_KERAS_FILENAME}"
+TRAINED_MODEL_DIR = "/src/trained_model"
 
 
 def model_evaluate():
@@ -36,7 +42,38 @@ def model_evaluate():
         object_name=TRAINED_MODEL_KERAS_FILENAME,
         file_path=TRAINED_MODEL_KERAS_FILE_PATH
     )
-    model = load_model(TRAINED_MODEL_KERAS_FILE_PATH)
+    # get_file_from_bucket(
+    #     client=minio_client,
+    #     bucket_name=MNIST_TRAINING_MODEL_BUCKET_NAME,
+    #     object_name=ASSETS_FILENAME,
+    #     file_path=f"{TRAINED_MODEL_DIR}/{ASSETS_FILENAME}"
+    # )
+    os.makedirs(f"{TRAINED_MODEL_DIR}/{ASSETS_FILENAME}")
+    get_all_files_from_bucket(
+        client=minio_client,
+        bucket_name=MNIST_TRAINING_MODEL_BUCKET_NAME,
+        dir_path=f"{TRAINED_MODEL_DIR}/{VARIABLES_FILENAME}"
+    )
+    get_file_from_bucket(
+        client=minio_client,
+        bucket_name=MNIST_TRAINING_MODEL_BUCKET_NAME,
+        object_name=FINGERPRINT_PB_FILENAME,
+        file_path=f"{TRAINED_MODEL_DIR}/{FINGERPRINT_PB_FILENAME}"
+    )
+    get_file_from_bucket(
+        client=minio_client,
+        bucket_name=MNIST_TRAINING_MODEL_BUCKET_NAME,
+        object_name=SAVED_MODEL_PB_FILENAME,
+        file_path=f"{TRAINED_MODEL_DIR}/{SAVED_MODEL_PB_FILENAME}"
+    )
+    get_file_from_bucket(
+        client=minio_client,
+        bucket_name=MNIST_TRAINING_MODEL_BUCKET_NAME,
+        object_name=KERAS_METADATA_PB_FILENAME,
+        file_path=f"{TRAINED_MODEL_DIR}/{KERAS_METADATA_PB_FILENAME}"
+    )
+    os.system("ls")
+    model = load_model(TRAINED_MODEL_DIR)
 
     # 從 MinIO 取得測試資料集
     get_file_from_bucket(
@@ -125,6 +162,30 @@ def connect_minio():
         secret_key=MINIO_SECRET_KEY,
         secure=False
     )
+
+
+def get_all_files_from_bucket(
+    client: Minio,
+    bucket_name: str,
+    dir_path: str
+):
+    """取得 MinIO Bucket 內的所有資料
+
+    Args:
+        client (Minio): MinIO Client instance
+        bucket_name (str): MinIO Bucket 名稱
+        dir_path (str): 下載後的資料夾路徑
+    """
+
+    objects = client.list_objects(bucket_name, recursive=True)
+    for obj in objects:
+        file_path = f"{dir_path}/{obj.object_name}"
+        get_file_from_bucket(
+            client=client,
+            bucket_name=bucket_name,
+            object_name=obj.object_name,  # type: ignore
+            file_path=file_path
+        )
 
 
 def get_file_from_bucket(

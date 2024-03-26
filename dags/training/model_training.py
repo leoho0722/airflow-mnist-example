@@ -1,9 +1,12 @@
+import glob
 import os
 import pickle
+from typing import BinaryIO
 from keras.layers import Conv2D, Dense, Dropout, Flatten, MaxPool2D
 from keras.models import Sequential
 from minio import Minio, S3Error
 import tensorflow as tf
+from tensorflow.python.keras.models import save_model
 
 # ===== Constants =====
 
@@ -20,11 +23,13 @@ Y_TRAIN_ONE_HOT_ENCODING_PKL_FILENAME = "y_Train_One_Hot_Encoding.pkl"
 Y_TEST_ONE_HOT_ENCODING_PKL_FILENAME = "y_TestOneHot.pkl"
 
 TRAINED_MODEL_KERAS_FILENAME = "trained_model.keras"
+TRAINED_MODEL_TF_FILENAME = "trained_model"
 
 X_TRAIN4D_NORMALIZE_FILE_PATH = f"/src/{X_TRAIN4D_NORMALIZE_PKL_FILENAME}"
 Y_TRAIN_ONE_HOT_ENCODING_FILE_PATH = f"/src/{Y_TRAIN_ONE_HOT_ENCODING_PKL_FILENAME}"
 Y_TEST_ONE_HOT_ENCODING_FILE_PATH = f"/src/{Y_TEST_ONE_HOT_ENCODING_PKL_FILENAME}"
 TRAINED_MODEL_KERAS_FILE_PATH = f"/src/{TRAINED_MODEL_KERAS_FILENAME}"
+TRAINED_MODEL_TF_FILE_PATH = f"/src/{TRAINED_MODEL_TF_FILENAME}"
 
 
 def check_gpu():
@@ -77,11 +82,57 @@ def model_training():
         model=trained_model,
         filename=TRAINED_MODEL_KERAS_FILE_PATH
     )
+    save_model(trained_model, TRAINED_MODEL_TF_FILE_PATH, save_format='tf')
+    os.system("ls -al")
+    if os.path.isdir(TRAINED_MODEL_TF_FILENAME):
+        os.system("echo trained_model directory...")
+        os.system(f"cd {TRAINED_MODEL_TF_FILENAME} && ls -al")
+    else:
+        os.system("echo trained_model not directory...")
+    if os.path.isdir(f"{TRAINED_MODEL_TF_FILENAME}/assets"):
+        os.system("echo trained_model/assets directory...")
+        os.system(f"cd {TRAINED_MODEL_TF_FILENAME}/assets && ls -al")
+    else:
+        os.system("echo trained_model/assets not directory...")
+    if os.path.isdir(f"{TRAINED_MODEL_TF_FILENAME}/variables"):
+        os.system("echo trained_model/variables directory...")
+        os.system(f"cd {TRAINED_MODEL_TF_FILENAME}/variables && ls -al")
+    else:
+        os.system("echo trained_model/variables not directory...")
     upload_file_to_bucket(
         client=minio_client,
         bucket_name=MNIST_TRAINING_MODEL_BUCKET_NAME,
         object_name=TRAINED_MODEL_KERAS_FILENAME,
         file_path=TRAINED_MODEL_KERAS_FILE_PATH
+    )
+    # upload_data_to_bucket(
+    #     client=minio_client,
+    #     bucket_name=MNIST_TRAINING_MODEL_BUCKET_NAME,
+    #     object_name="assets",
+    #     data=open(f"{TRAINED_MODEL_TF_FILENAME}/assets", "rb")
+    # )
+    upload_directory_flat_to_bucket(
+        client=minio_client,
+        bucket_name=MNIST_TRAINING_MODEL_BUCKET_NAME,
+        dir_path=f"{TRAINED_MODEL_TF_FILENAME}/variables"
+    )
+    upload_file_to_bucket(
+        client=minio_client,
+        bucket_name=MNIST_TRAINING_MODEL_BUCKET_NAME,
+        object_name="fingerprint.pb",
+        file_path=f"{TRAINED_MODEL_TF_FILENAME}/fingerprint.pb"
+    )
+    upload_file_to_bucket(
+        client=minio_client,
+        bucket_name=MNIST_TRAINING_MODEL_BUCKET_NAME,
+        object_name="saved_model.pb",
+        file_path=f"{TRAINED_MODEL_TF_FILENAME}/saved_model.pb"
+    )
+    upload_file_to_bucket(
+        client=minio_client,
+        bucket_name=MNIST_TRAINING_MODEL_BUCKET_NAME,
+        object_name="keras_metadata.pb",
+        file_path=f"{TRAINED_MODEL_TF_FILENAME}/keras_metadata.pb"
     )
 
 
@@ -279,13 +330,13 @@ def upload_file_to_bucket(
     object_name: str,
     file_path: str
 ):
-    """上傳資料到 MinIO Bucket 內
+    """上傳檔案到 MinIO Bucket 內
 
     Args:
         client (Minio): MinIO Client instance
         bucket_name (str): MinIO Bucket 名稱
         object_name (str): 要上傳到 MinIO Bucket 的 object 名稱
-        filename (object): 要上傳到 MinIO Bucket 的檔案名稱
+        file_path (str): 要上傳到 MinIO Bucket 的本地檔案路徑
     """
 
     try:
@@ -297,6 +348,33 @@ def upload_file_to_bucket(
     except S3Error as err:
         print(
             f"upload file {file_path} to minio bucket {bucket_name} occurs error. Error: {err}"
+        )
+
+
+def upload_directory_flat_to_bucket(
+    client: Minio,
+    bucket_name: str,
+    dir_path: str
+):
+    """上傳資料到 MinIO Bucket 內
+
+    Args:
+        client (Minio): MinIO Client instance
+        bucket_name (str): MinIO Bucket 名稱
+        object_name (str): 要上傳到 MinIO Bucket 的 object 名稱
+        data (BinaryIO): 要上傳到 MinIO Bucket 的本地檔案資料
+    """
+
+    assert os.path.isdir(dir_path), f"{dir_path} is not a directory"
+
+    for filename in glob.glob(f"{dir_path}/*"):
+        print(f"filename: {filename} is directory: {os.path.isdir(filename)}")
+        print(f"filename: {filename} is file: {os.path.isfile(filename)}")
+        upload_file_to_bucket(
+            client=client,
+            bucket_name=bucket_name,
+            object_name=filename.split("/")[-1],
+            file_path=filename
         )
 
 
