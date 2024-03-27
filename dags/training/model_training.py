@@ -22,15 +22,11 @@ Y_TRAIN_ONE_HOT_ENCODING_PKL_FILENAME = "y_Train_One_Hot_Encoding.pkl"
 Y_TEST_ONE_HOT_ENCODING_PKL_FILENAME = "y_TestOneHot.pkl"
 
 TRAINED_MODEL_KERAS_FILENAME = "trained_model.keras"
-# TRAINED_MODEL_TF_FILENAME = "trained_model"
-# TRAINED_MODEL_H5_FILENAME = "trained_model.h5"
 
 X_TRAIN4D_NORMALIZE_FILE_PATH = f"/src/{X_TRAIN4D_NORMALIZE_PKL_FILENAME}"
 Y_TRAIN_ONE_HOT_ENCODING_FILE_PATH = f"/src/{Y_TRAIN_ONE_HOT_ENCODING_PKL_FILENAME}"
 Y_TEST_ONE_HOT_ENCODING_FILE_PATH = f"/src/{Y_TEST_ONE_HOT_ENCODING_PKL_FILENAME}"
 TRAINED_MODEL_KERAS_FILE_PATH = f"/src/{TRAINED_MODEL_KERAS_FILENAME}"
-# TRAINED_MODEL_TF_FILE_PATH = f"/src/{TRAINED_MODEL_TF_FILENAME}"
-# TRAINED_MODEL_H5_FILE_PATH = f"/src/{TRAINED_MODEL_H5_FILENAME}"
 
 
 def check_gpu():
@@ -79,72 +75,13 @@ def model_training():
     )
 
     # 將訓練後的模型資料儲存到 MinIO Bucket
-    # save_trained_model(
-    #     model=trained_model,
-    #     filename=TRAINED_MODEL_KERAS_FILE_PATH
-    # )
-    # trained_model_json_config = trained_model.to_json()
-    # os.system(f"echo {trained_model_json_config}")
-    # open("/src/trained_model.json", "w").write(trained_model_json_config)
-    # save_model(trained_model, TRAINED_MODEL_TF_FILE_PATH, save_format='tf')
-    # trained_model.save(TRAINED_MODEL_H5_FILENAME, save_format='h5')
     os.system("ls -al")
-    # if os.path.isdir(TRAINED_MODEL_TF_FILENAME):
-    #     os.system("echo trained_model directory...")
-    #     os.system(f"cd {TRAINED_MODEL_TF_FILENAME} && ls -al")
-    # else:
-    #     os.system("echo trained_model not directory...")
-    # if os.path.isdir(f"{TRAINED_MODEL_TF_FILENAME}/assets"):
-    #     os.system("echo trained_model/assets directory...")
-    #     os.system(f"cd {TRAINED_MODEL_TF_FILENAME}/assets && ls -al")
-    # else:
-    #     os.system("echo trained_model/assets not directory...")
-    # if os.path.isdir(f"{TRAINED_MODEL_TF_FILENAME}/variables"):
-    #     os.system("echo trained_model/variables directory...")
-    #     os.system(f"cd {TRAINED_MODEL_TF_FILENAME}/variables && ls -al")
-    # else:
-    #     os.system("echo trained_model/variables not directory...")
-    # upload_file_to_bucket(
-    #     client=minio_client,
-    #     bucket_name=MNIST_TRAINING_MODEL_BUCKET_NAME,
-    #     object_name="trained_model.json",
-    #     file_path="/src/trained_model.json"
-    # )
     upload_file_to_bucket(
         client=minio_client,
         bucket_name=MNIST_TRAINING_MODEL_BUCKET_NAME,
         object_name=TRAINED_MODEL_KERAS_FILENAME,
         file_path=TRAINED_MODEL_KERAS_FILE_PATH
     )
-    # upload_file_to_bucket(
-    #     client=minio_client,
-    #     bucket_name=MNIST_TRAINING_MODEL_BUCKET_NAME,
-    #     object_name=TRAINED_MODEL_H5_FILENAME,
-    #     file_path=TRAINED_MODEL_H5_FILE_PATH
-    # )
-    # upload_directory_flat_to_bucket(
-    #     client=minio_client,
-    #     bucket_name=MNIST_TRAINING_MODEL_BUCKET_NAME,
-    #     dir_path=f"{TRAINED_MODEL_TF_FILENAME}/variables"
-    # )
-    # upload_file_to_bucket(
-    #     client=minio_client,
-    #     bucket_name=MNIST_TRAINING_MODEL_BUCKET_NAME,
-    #     object_name="fingerprint.pb",
-    #     file_path=f"{TRAINED_MODEL_TF_FILENAME}/fingerprint.pb"
-    # )
-    # upload_file_to_bucket(
-    #     client=minio_client,
-    #     bucket_name=MNIST_TRAINING_MODEL_BUCKET_NAME,
-    #     object_name="saved_model.pb",
-    #     file_path=f"{TRAINED_MODEL_TF_FILENAME}/saved_model.pb"
-    # )
-    # upload_file_to_bucket(
-    #     client=minio_client,
-    #     bucket_name=MNIST_TRAINING_MODEL_BUCKET_NAME,
-    #     object_name="keras_metadata.pb",
-    #     file_path=f"{TRAINED_MODEL_TF_FILENAME}/keras_metadata.pb"
-    # )
 
 
 def model_build():
@@ -189,13 +126,6 @@ def create_cn_layer_and_pool_layer(model):
         activation='relu',
         name='conv2d_2'
     ))
-    # model.add(Conv2D(
-    #     filters=36,
-    #     kernel_size=(5, 5),
-    #     padding='same',
-    #     activation='relu',
-    #     name='conv2d_2'
-    # ))
 
     # Create Max-Pool 2
     model.add(MaxPool2D(
