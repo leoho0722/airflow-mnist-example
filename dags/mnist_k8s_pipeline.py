@@ -1,5 +1,6 @@
 from datetime import datetime
 from airflow import DAG
+from airflow.models import BaseOperator
 from airflow.providers.cncf.kubernetes.operators.kubernetes_pod import KubernetesPodOperator
 from kubernetes.client.models.v1_resource_requirements import V1ResourceRequirements
 
@@ -47,7 +48,7 @@ with DAG(
     training_op = KubernetesPodOperator(
         task_id="mnist-training",
         namespace="default",
-        image="leoho0722/airflow-training:0.0.3-k8s-gpu",
+        image="leoho0722/airflow-training:0.0.4-k8s-gpu",
         name="mnist-training",
         startup_timeout_seconds=1200,
         image_pull_policy="Always",
@@ -66,7 +67,7 @@ with DAG(
     evaluate_op = KubernetesPodOperator(
         task_id="mnist-evaluate",
         namespace="default",
-        image="leoho0722/airflow-evaluate:0.0.3-k8s",
+        image="leoho0722/airflow-evaluate:0.0.4-k8s",
         name="mnist-evaluate",
         startup_timeout_seconds=1200,
         image_pull_policy="Always",
@@ -75,3 +76,12 @@ with DAG(
     )
 
     buckets_create_op >> preprocess_op >> training_op >> evaluate_op
+
+
+class TFJobKubeflowOperator(BaseOperator):
+    def __init__(
+        self,
+        **kwargs
+    ):
+        super().__init__(**kwargs)
+    pass
