@@ -1,12 +1,11 @@
 import glob
 import os
 import pickle
-from typing import BinaryIO
 from keras.layers import Conv2D, Dense, Dropout, Flatten, MaxPool2D
 from keras.models import Sequential
 from minio import Minio, S3Error
 import tensorflow as tf
-from tensorflow.python.keras.models import save_model
+
 
 # ===== Constants =====
 
@@ -23,13 +22,15 @@ Y_TRAIN_ONE_HOT_ENCODING_PKL_FILENAME = "y_Train_One_Hot_Encoding.pkl"
 Y_TEST_ONE_HOT_ENCODING_PKL_FILENAME = "y_TestOneHot.pkl"
 
 TRAINED_MODEL_KERAS_FILENAME = "trained_model.keras"
-TRAINED_MODEL_TF_FILENAME = "trained_model"
+# TRAINED_MODEL_TF_FILENAME = "trained_model"
+# TRAINED_MODEL_H5_FILENAME = "trained_model.h5"
 
 X_TRAIN4D_NORMALIZE_FILE_PATH = f"/src/{X_TRAIN4D_NORMALIZE_PKL_FILENAME}"
 Y_TRAIN_ONE_HOT_ENCODING_FILE_PATH = f"/src/{Y_TRAIN_ONE_HOT_ENCODING_PKL_FILENAME}"
 Y_TEST_ONE_HOT_ENCODING_FILE_PATH = f"/src/{Y_TEST_ONE_HOT_ENCODING_PKL_FILENAME}"
 TRAINED_MODEL_KERAS_FILE_PATH = f"/src/{TRAINED_MODEL_KERAS_FILENAME}"
-TRAINED_MODEL_TF_FILE_PATH = f"/src/{TRAINED_MODEL_TF_FILENAME}"
+# TRAINED_MODEL_TF_FILE_PATH = f"/src/{TRAINED_MODEL_TF_FILENAME}"
+# TRAINED_MODEL_H5_FILE_PATH = f"/src/{TRAINED_MODEL_H5_FILENAME}"
 
 
 def check_gpu():
@@ -71,69 +72,79 @@ def model_training():
     model = model_build()
 
     # 訓練模型
-    trained_model, _ = training_model(
+    training_model(
         model=model,
         normalize_data=X_Train4D_normalize,
         onehot_data=y_TrainOneHot
     )
 
     # 將訓練後的模型資料儲存到 MinIO Bucket
-    save_trained_model(
-        model=trained_model,
-        filename=TRAINED_MODEL_KERAS_FILE_PATH
-    )
-    save_model(trained_model, TRAINED_MODEL_TF_FILE_PATH, save_format='tf')
+    # save_trained_model(
+    #     model=trained_model,
+    #     filename=TRAINED_MODEL_KERAS_FILE_PATH
+    # )
+    # trained_model_json_config = trained_model.to_json()
+    # os.system(f"echo {trained_model_json_config}")
+    # open("/src/trained_model.json", "w").write(trained_model_json_config)
+    # save_model(trained_model, TRAINED_MODEL_TF_FILE_PATH, save_format='tf')
+    # trained_model.save(TRAINED_MODEL_H5_FILENAME, save_format='h5')
     os.system("ls -al")
-    if os.path.isdir(TRAINED_MODEL_TF_FILENAME):
-        os.system("echo trained_model directory...")
-        os.system(f"cd {TRAINED_MODEL_TF_FILENAME} && ls -al")
-    else:
-        os.system("echo trained_model not directory...")
-    if os.path.isdir(f"{TRAINED_MODEL_TF_FILENAME}/assets"):
-        os.system("echo trained_model/assets directory...")
-        os.system(f"cd {TRAINED_MODEL_TF_FILENAME}/assets && ls -al")
-    else:
-        os.system("echo trained_model/assets not directory...")
-    if os.path.isdir(f"{TRAINED_MODEL_TF_FILENAME}/variables"):
-        os.system("echo trained_model/variables directory...")
-        os.system(f"cd {TRAINED_MODEL_TF_FILENAME}/variables && ls -al")
-    else:
-        os.system("echo trained_model/variables not directory...")
+    # if os.path.isdir(TRAINED_MODEL_TF_FILENAME):
+    #     os.system("echo trained_model directory...")
+    #     os.system(f"cd {TRAINED_MODEL_TF_FILENAME} && ls -al")
+    # else:
+    #     os.system("echo trained_model not directory...")
+    # if os.path.isdir(f"{TRAINED_MODEL_TF_FILENAME}/assets"):
+    #     os.system("echo trained_model/assets directory...")
+    #     os.system(f"cd {TRAINED_MODEL_TF_FILENAME}/assets && ls -al")
+    # else:
+    #     os.system("echo trained_model/assets not directory...")
+    # if os.path.isdir(f"{TRAINED_MODEL_TF_FILENAME}/variables"):
+    #     os.system("echo trained_model/variables directory...")
+    #     os.system(f"cd {TRAINED_MODEL_TF_FILENAME}/variables && ls -al")
+    # else:
+    #     os.system("echo trained_model/variables not directory...")
+    # upload_file_to_bucket(
+    #     client=minio_client,
+    #     bucket_name=MNIST_TRAINING_MODEL_BUCKET_NAME,
+    #     object_name="trained_model.json",
+    #     file_path="/src/trained_model.json"
+    # )
     upload_file_to_bucket(
         client=minio_client,
         bucket_name=MNIST_TRAINING_MODEL_BUCKET_NAME,
         object_name=TRAINED_MODEL_KERAS_FILENAME,
         file_path=TRAINED_MODEL_KERAS_FILE_PATH
     )
-    # upload_data_to_bucket(
+    # upload_file_to_bucket(
     #     client=minio_client,
     #     bucket_name=MNIST_TRAINING_MODEL_BUCKET_NAME,
-    #     object_name="assets",
-    #     data=open(f"{TRAINED_MODEL_TF_FILENAME}/assets", "rb")
+    #     object_name=TRAINED_MODEL_H5_FILENAME,
+    #     file_path=TRAINED_MODEL_H5_FILE_PATH
     # )
-    upload_directory_flat_to_bucket(
-        client=minio_client,
-        bucket_name=MNIST_TRAINING_MODEL_BUCKET_NAME,
-        dir_path=f"{TRAINED_MODEL_TF_FILENAME}/variables"
-    )
-    upload_file_to_bucket(
-        client=minio_client,
-        bucket_name=MNIST_TRAINING_MODEL_BUCKET_NAME,
-        object_name="fingerprint.pb",
-        file_path=f"{TRAINED_MODEL_TF_FILENAME}/fingerprint.pb"
-    )
-    upload_file_to_bucket(
-        client=minio_client,
-        bucket_name=MNIST_TRAINING_MODEL_BUCKET_NAME,
-        object_name="saved_model.pb",
-        file_path=f"{TRAINED_MODEL_TF_FILENAME}/saved_model.pb"
-    )
-    upload_file_to_bucket(
-        client=minio_client,
-        bucket_name=MNIST_TRAINING_MODEL_BUCKET_NAME,
-        object_name="keras_metadata.pb",
-        file_path=f"{TRAINED_MODEL_TF_FILENAME}/keras_metadata.pb"
-    )
+    # upload_directory_flat_to_bucket(
+    #     client=minio_client,
+    #     bucket_name=MNIST_TRAINING_MODEL_BUCKET_NAME,
+    #     dir_path=f"{TRAINED_MODEL_TF_FILENAME}/variables"
+    # )
+    # upload_file_to_bucket(
+    #     client=minio_client,
+    #     bucket_name=MNIST_TRAINING_MODEL_BUCKET_NAME,
+    #     object_name="fingerprint.pb",
+    #     file_path=f"{TRAINED_MODEL_TF_FILENAME}/fingerprint.pb"
+    # )
+    # upload_file_to_bucket(
+    #     client=minio_client,
+    #     bucket_name=MNIST_TRAINING_MODEL_BUCKET_NAME,
+    #     object_name="saved_model.pb",
+    #     file_path=f"{TRAINED_MODEL_TF_FILENAME}/saved_model.pb"
+    # )
+    # upload_file_to_bucket(
+    #     client=minio_client,
+    #     bucket_name=MNIST_TRAINING_MODEL_BUCKET_NAME,
+    #     object_name="keras_metadata.pb",
+    #     file_path=f"{TRAINED_MODEL_TF_FILENAME}/keras_metadata.pb"
+    # )
 
 
 def model_build():
@@ -155,28 +166,48 @@ def create_cn_layer_and_pool_layer(model):
     """
 
     # Create CN layer 1
-    model.add(Conv2D(filters=16,
-                     kernel_size=(5, 5),
-                     padding='same',
-                     input_shape=(28, 28, 1),
-                     activation='relu',
-                     name='conv2d_1'))
+    model.add(Conv2D(
+        filters=16,
+        kernel_size=(5, 5),
+        padding='same',
+        input_shape=(28, 28, 1),
+        activation='relu',
+        name='conv2d_1'
+    ))
     # Create Max-Pool 1
-    model.add(MaxPool2D(pool_size=(2, 2), name='max_pooling2d_1'))
+    model.add(MaxPool2D(
+        pool_size=(2, 2),
+        name='max_pooling2d_1'
+    ))
 
     # Create CN layer 2
-    model.add(Conv2D(filters=36,
-                     kernel_size=(5, 5),
-                     padding='same',
-                     input_shape=(28, 28, 1),
-                     activation='relu',
-                     name='conv2d_2'))
+    model.add(Conv2D(
+        filters=36,
+        kernel_size=(5, 5),
+        padding='same',
+        input_shape=(28, 28, 1),
+        activation='relu',
+        name='conv2d_2'
+    ))
+    # model.add(Conv2D(
+    #     filters=36,
+    #     kernel_size=(5, 5),
+    #     padding='same',
+    #     activation='relu',
+    #     name='conv2d_2'
+    # ))
 
     # Create Max-Pool 2
-    model.add(MaxPool2D(pool_size=(2, 2), name='max_pooling2d_2'))
+    model.add(MaxPool2D(
+        pool_size=(2, 2),
+        name='max_pooling2d_2'
+    ))
 
     # Add Dropout layer
-    model.add(Dropout(0.25, name='dropout_1'))
+    model.add(Dropout(
+        rate=0.25,
+        name='dropout_1'
+    ))
 
 
 def create_flatten_layer_and_hidden_layer(model):
@@ -190,11 +221,22 @@ def create_flatten_layer_and_hidden_layer(model):
     model.add(Flatten(name='flatten_1'))
 
     # Create Hidden layer
-    model.add(Dense(128, activation='relu', name='dense_1'))
-    model.add(Dropout(0.5, name='dropout_2'))
+    model.add(Dense(
+        units=128,
+        activation='relu',
+        name='dense_1'
+    ))
+    model.add(Dropout(
+        rate=0.5,
+        name='dropout_2'
+    ))
 
     # Create Output layer
-    model.add(Dense(10, activation='softmax', name='dense_2'))
+    model.add(Dense(
+        units=10,
+        activation='softmax',
+        name='dense_2'
+    ))
 
 
 def model_summary(model):
@@ -218,13 +260,15 @@ def training_model(model, normalize_data, onehot_data):
     """
 
     # 定義訓練方式
-    model.compile(loss='categorical_crossentropy',
-                  optimizer='adam',
-                  metrics=['accuracy'])
+    model.compile(
+        loss='categorical_crossentropy',
+        optimizer='adam',
+        metrics=['accuracy']
+    )
 
     # 開始訓練
     training_epochs = os.environ["TRAINING_EPOCHS"]  # 10
-    train_result = model.fit(
+    model.fit(
         x=normalize_data,
         y=onehot_data,
         validation_split=0.2,
@@ -233,7 +277,10 @@ def training_model(model, normalize_data, onehot_data):
         verbose=1
     )
 
-    return model, train_result
+    save_trained_model(
+        model=model,
+        filename=TRAINED_MODEL_KERAS_FILE_PATH
+    )
 
 
 def save_trained_model(model, filename: str):

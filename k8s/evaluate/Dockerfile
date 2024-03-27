@@ -1,4 +1,4 @@
-FROM tensorflow/tensorflow:2.16.1
+FROM tensorflow/tensorflow:2.14.0
 
 WORKDIR /src
 
