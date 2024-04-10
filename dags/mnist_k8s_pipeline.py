@@ -12,6 +12,8 @@ with DAG(
     dag_id='mnist-k8s-pipeline',
     default_args=default_args,
     start_date=datetime(2024, 3, 20),
+    max_active_runs=1,
+    max_active_tasks=1,
 ):
     env_vars = {
         "MINIO_API_ENDPOINT": "10.0.0.196:9000",
