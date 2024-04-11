@@ -1,4 +1,4 @@
-from constants import env
+from config import env
 from utils.utils import write_file
 from utils.minio import client as mc
 from utils.minio import buckets as mc_buckets
