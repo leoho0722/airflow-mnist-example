@@ -1,5 +1,5 @@
 from minio import Minio
-from constants import env
+from config import env
 
 
 def connect_minio():
