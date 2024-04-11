@@ -53,13 +53,3 @@ config-minio-client:
 .PHONY: run-airflow
 run-airflow:
 	sh ./scripts/run-airflow.sh
-
-# (Deprecated) 設定 Airflow Home 環境變數
-.PHONY: config-airflow-home-env
-config-airflow-home-env:
-	export AIRFLOW_HOME=$(pwd)
-
-# (Deprecated) 啟動 Airflow Standalone
-.PHONY: run-airflow-standalone
-run-airflow-standalone:
-	clear && airflow standalone
