@@ -2,5 +2,6 @@ apache-airflow
 apache-airflow-providers-postgres
 apache-airflow-providers-cncf-kubernetes
 kubernetes
+kubeflow
 minio
 tensorflow
