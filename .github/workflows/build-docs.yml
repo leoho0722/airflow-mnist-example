@@ -2,7 +2,7 @@ name: Build documentation
 
 on:
   push:
-    branches: ["main", "kubernetes"]
+    branches: ["main", "kubernetes", "kubeflow"]
   workflow_dispatch:
 
 permissions:
