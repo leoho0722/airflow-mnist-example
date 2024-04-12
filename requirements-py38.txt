@@ -4,6 +4,8 @@ keras==2.13.1
 minio==7.2.5
 numpy==1.24.3
 tensorflow==2.13.1
+
+# Optional, reinstall if the above packages cause incompatibility
 werkzeug==2.2.3
 packaging==23.2
 importlib-metadata==6.5.0
