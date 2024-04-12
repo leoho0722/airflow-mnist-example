@@ -1,4 +1,4 @@
-from constants import env
+from config import env
 
 from minio import Minio
 
