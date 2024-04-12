@@ -16,7 +16,7 @@ sudo lshw -C display
 lsmod | grep nouveau
 ```
 
-有出現「nouveau」就代表有預設驅動
+If "nouveau" appears, it means there is a default driver.
 
 ![截圖 2024-04-12 15.59.51.png](截圖_2024-04-12_15.59.51.png)
 
@@ -40,13 +40,13 @@ sudo apt-get update -y
 sudo apt install -y build-essential linux-headers-$(uname -r) wget
 ```
 
-從 NVIDIA 官網下載所需的 CUDA Toolkit 版本
+Download the required CUDA Toolkit version from the NVIDIA official website
 
 [NVIDIA CUDA Toolkit Official Download Website](https://developer.nvidia.com/cuda-toolkit-archive)
 
 ![截圖 2024-04-12 16.12.08.png](截圖_2024-04-12_16.12.08.png)
 
-這邊示範的環境為
+The environment demonstrated here is
 
 * CUDA Toolkit 12.4.1
 * Ubuntu 22.04 x86_64
@@ -58,16 +58,17 @@ sudo apt install -y build-essential linux-headers-$(uname -r) wget
 wget https://developer.download.nvidia.com/compute/cuda/12.4.1/local_installers/cuda_12.4.1_550.54.15_linux.run
 sudo sh cuda_12.4.1_550.54.15_linux.run
 ```
-執行後，會看到類 UI 的安裝選單
-輸入 accept 來接受使用者條款
+
+After execution, you will see a UI-like installation menu.
+Enter accept to accept the terms of use
 
 ![截圖 2024-04-12 16.49.14.png](截圖_2024-04-12_16.49.14.png)
 
-用空白鍵勾選「Driver」、「CUDA Toolkit」
+Use the space bar to select "Driver" and "CUDA Toolkit"
 
 ![截圖 2024-04-12 16.54.35.png](截圖_2024-04-12_16.54.35.png)
 
-安裝完成後，將下面兩行新增到 ```~/.bashrc``` 的最後
+After the installation is complete, add the following two lines to the end of ```~/.bashrc```
 
 ```Shell
 nano ~/.bashrc
@@ -99,17 +100,17 @@ nvcc --version
 
 ## Install NVIDIA cuDNN
 
-從 NVIDIA 官網下載所需的 cuDNN 版本
+Download the required cuDNN version from the NVIDIA official website
 
 [NVIDIA cuDNN Official Download Website](https://developer.download.nvidia.com/compute/cudnn/redist/cudnn/)
 
 ![截圖 2024-04-12 17.19.22.png](截圖_2024-04-12_17.19.22.png)
 
-這邊系統環境是 Ubuntu 22.04 x86_64，所以選 ```linux-x86_64/```
+The system environment here is Ubuntu 22.04 x86_64, so choose ```linux-x86_64/```
 
 ![截圖 2024-04-12 17.21.06.png](截圖_2024-04-12_17.21.06.png)
 
-這邊以 ```cudnn-linux-x86_64-8.9.7.29_cuda12-archive.tar.xz``` 為例
+Here we take ```cudnn-linux-x86_64-8.9.7.29_cuda12-archive.tar.xz``` as an example
 
 ```Shell
 wget https://developer.download.nvidia.com/compute/cudnn/redist/cudnn/linux-x86_64/cudnn-linux-x86_64-8.9.7.29_cuda12-archive.tar.xz
@@ -174,7 +175,7 @@ sudo nvidia-ctk runtime configure --runtime=docker
 sudo systemctl restart docker
 ```
 
-確認 ```/etc/docker/daemon.json``` 是否有正確設定 NVIDIA GPU runtime，類似下面的資訊
+Confirm whether ```/etc/docker/daemon.json``` has correctly configured NVIDIA GPU runtime, similar to the following information
 
 ```Shell
 cat /etc/docker/daemon.json
@@ -200,7 +201,7 @@ cat /etc/docker/daemon.json
 }
 ```
 
-如果依照官方步驟，卻沒有自動將 ```default-runtime``` 設定為 ```nvidia``` 的話，需手動加入
+If you follow the official steps but do not automatically set ```default-runtime``` to ```nvidia```, you need to manually add it.
 
 ```Shell
 sudo nano /etc/docker/daemon.json
@@ -219,7 +220,7 @@ sudo systemctl restart containerd
 
 [Kubernetes NVIDIA Device Plugin Official GitHub Repo](https://github.com/NVIDIA/k8s-device-plugin)
 
-部署 ```nvidia-device-plugin``` DaemonSet 到 Kubernetes Cluster 中
+Deploy ```nvidia-device-plugin``` DaemonSet to Kubernetes Cluster
 
 ```Shell
 kubectl create -f https://raw.githubusercontent.com/NVIDIA/k8s-device-plugin/v0.14.5/nvidia-device-plugin.yml
@@ -252,13 +253,13 @@ EOF
 kubectl logs pod/gpu-pod
 ```
 
-輸出 ```Test PASSED``` 就代表有成功在 Pod 中使用 GPU 資源
+Outputting ```Test PASSED``` means that GPU resources are successfully used in the Pod.
 
 ![截圖 2024-04-12 18.30.15.png](截圖_2024-04-12_18.30.15.png)
 
 ### Check node can use GPU resource or not
 
-確認 ```Capacity``` 跟 ```Allocatable``` 是否有顯示 ```nvidia.com/gpu```
+Check whether ```Capacity``` and ```Allocatable``` are displayed ```nvidia.com/gpu```
 
 ```Shell
 kubectl describe node <Worker Node name>
