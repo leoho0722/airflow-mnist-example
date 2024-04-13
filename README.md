@@ -55,4 +55,4 @@ airflow-buckets-create >> airflow-preprocess >> airflow-training >> airflow-eval
 
 ## Documentation
 
-Go to the [Documentation](https://leoho0722.github.io/airflow-mnist-example/home.html)
+Go to the [Documentation](https://leoho0722.github.io/docs-repo/airflow-mnist-example.html)
