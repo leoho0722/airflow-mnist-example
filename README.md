@@ -10,12 +10,12 @@
 
 ### Deployment
 
-| Operating System | Python  | Airflow | Tensorflow | PostgreSQL | MinIO | Kubernetes |
-|------------------|---------|:-------:|:----------:|:----------:|:-----:|:----------:|
-| Ubuntu 20.04 LTS | 3.8.10  |  2.8.3  |   2.16.1   |    16.2    | 7.2.5 |   1.29.3   |
-| Ubuntu 22.04 LTS | 3.10.12 |  2.8.3  |   2.16.1   |    16.2    | 7.2.5 |   1.29.3   |
-| Ubuntu 23.10     | 3.11.6  |  2.8.3  |   2.16.1   |    16.2    | 7.2.5 |   1.29.3   |
+| Operating System | Python | Airflow | Tensorflow | PostgreSQL | MinIO | Kubernetes |
+|------------------|--------|:-------:|:----------:|:----------:|:-----:|:----------:|
+| Ubuntu 20.04 LTS | 3.8.x  |  2.8.3  |   2.16.1   |    16.2    | 7.2.5 |   1.29.3   |
+| Ubuntu 22.04 LTS | 3.10.x |  2.8.3  |   2.16.1   |    16.2    | 7.2.5 |   1.29.3   |
+| Ubuntu 23.10     | 3.11.x |  2.8.3  |   2.16.1   |    16.2    | 7.2.5 |   1.29.3   |
 
 ## Documentation
 
-Go to the [Documentation](https://leoho0722.github.io/airflow-mnist-example/home.html)
+Go to the [Documentation](https://leoho0722.github.io/docs-repo/airflow-mnist-example.html)
