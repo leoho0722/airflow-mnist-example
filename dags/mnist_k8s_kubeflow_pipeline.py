@@ -46,7 +46,7 @@ with DAG(
 
     training_tfjob = TFJobKubeflowOperator(
         task_id="mnist-training-tfjob",
-        namespace="default",
+        namespace="kubeflow",
         name="mnist-training-tfjob",
         image="leoho0722/airflow-training:0.0.4-k8s-gpu",
         env_vars=env_vars,
