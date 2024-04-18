@@ -1,23 +1,25 @@
 from airflow import DAG
+from airflow.operators.python import PythonOperator
 from airflow.providers.cncf.kubernetes.operators.pod import KubernetesPodOperator
 from kubernetes.client.models import V1EnvVar
 
-from custom_operators.kubeflow.tfjob import TFJobKubeflowOperator
+from config import env
+from custom_operators.kubeflow.tfjob import KubeTFJobOperator
 
 default_args = {
     'owner': 'Leo Ho',
 }
 
 with DAG(
-    dag_id='mnist-k8s-kubeflow-pipeline',
+    dag_id='mnist-kubeflow-pipeline',
     default_args=default_args,
     max_active_tasks=1,
     max_active_runs=1
 ):
     env_vars = [
-        V1EnvVar(name="MINIO_API_ENDPOINT", value="10.0.0.196:9000"),
-        V1EnvVar(name="MINIO_ACCESS_KEY", value="minioadmin"),
-        V1EnvVar(name="MINIO_SECRET_KEY", value="minioadmin"),
+        V1EnvVar(name="MINIO_API_ENDPOINT", value=env.MINIO_API_ENDPOINT),
+        V1EnvVar(name="MINIO_ACCESS_KEY", value=env.MINIO_ACCESS_KEY),
+        V1EnvVar(name="MINIO_SECRET_KEY", value=env.MINIO_SECRET_KEY),
         V1EnvVar(name="TRAINING_EPOCHS", value="10")
     ]
     node_selector = {
@@ -44,13 +46,18 @@ with DAG(
         env_vars=env_vars,
     )
 
-    training_tfjob = TFJobKubeflowOperator(
-        task_id="mnist-training-tfjob",
+    training_tfjob = KubeTFJobOperator(
+        task_id="tensorflow",
         namespace="kubeflow",
-        name="mnist-training-tfjob",
+        name="tensorflow",
         image="leoho0722/airflow-training:0.0.4-k8s-gpu",
         env_vars=env_vars,
-        node_selector=node_selector
+        node_name="ubuntu3070ti"
+    )
+
+    terminating_tfjob = PythonOperator(
+        task_id="terminating-tfjob",
+        python_callable=training_tfjob.clear
     )
 
     evaluate = KubernetesPodOperator(
@@ -63,4 +70,4 @@ with DAG(
         env_vars=env_vars,
     )
 
-    buckets_create >> preprocess >> training_tfjob >> evaluate
+    buckets_create >> preprocess >> training_tfjob >> terminating_tfjob >> evaluate

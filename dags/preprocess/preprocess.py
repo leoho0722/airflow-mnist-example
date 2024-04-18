@@ -1,5 +1,6 @@
 import os
 import pickle
+
 from keras.utils import to_categorical
 from minio import Minio, S3Error
 import numpy as np
