@@ -1,8 +1,8 @@
-from datetime import datetime
 from airflow import DAG
-from airflow.models import BaseOperator
 from airflow.providers.cncf.kubernetes.operators.kubernetes_pod import KubernetesPodOperator
-from kubernetes.client.models.v1_resource_requirements import V1ResourceRequirements
+from kubernetes.client.models import V1ResourceRequirements, V1EnvVar
+
+from config import env
 
 default_args = {
     'owner': 'Leo Ho',
@@ -11,21 +11,20 @@ default_args = {
 with DAG(
     dag_id='mnist-k8s-pipeline',
     default_args=default_args,
-    start_date=datetime(2024, 3, 20),
-    max_active_runs=1,
     max_active_tasks=1,
+    max_active_runs=1
 ):
-    env_vars = {
-        "MINIO_API_ENDPOINT": "10.0.0.196:9000",
-        "MINIO_ACCESS_KEY": "minioadmin",
-        "MINIO_SECRET_KEY": "minioadmin",
-        "TRAINING_EPOCHS": "10"
-    }
+    env_vars = [
+        V1EnvVar(name="MINIO_API_ENDPOINT", value=env.MINIO_API_ENDPOINT),
+        V1EnvVar(name="MINIO_ACCESS_KEY", value=env.MINIO_ACCESS_KEY),
+        V1EnvVar(name="MINIO_SECRET_KEY", value=env.MINIO_SECRET_KEY),
+        V1EnvVar(name="TRAINING_EPOCHS", value="100")
+    ]
     node_selector = {
         "kubernetes.io/hostname": "3070ti"
     }
 
-    buckets_create_op = KubernetesPodOperator(
+    buckets_create = KubernetesPodOperator(
         task_id="mnist-buckets-create",
         namespace="default",
         image="leoho0722/airflow-buckets-create:0.0.3-k8s",
@@ -33,10 +32,9 @@ with DAG(
         startup_timeout_seconds=1200,
         image_pull_policy="Always",
         env_vars=env_vars,
-        node_selector=node_selector
     )
 
-    preprocess_op = KubernetesPodOperator(
+    preprocess = KubernetesPodOperator(
         task_id="mnist-preprocess",
         namespace="default",
         image="leoho0722/airflow-preprocess:0.0.3-k8s",
@@ -44,10 +42,9 @@ with DAG(
         startup_timeout_seconds=1200,
         image_pull_policy="Always",
         env_vars=env_vars,
-        node_selector=node_selector
     )
 
-    training_op = KubernetesPodOperator(
+    training = KubernetesPodOperator(
         task_id="mnist-training",
         namespace="default",
         image="leoho0722/airflow-training:0.0.4-k8s-gpu",
@@ -59,14 +56,11 @@ with DAG(
             limits={
                 "nvidia.com/gpu": 1
             },
-            requests={
-                "nvidia.com/gpu": 1
-            },
         ),
         node_selector=node_selector
     )
 
-    evaluate_op = KubernetesPodOperator(
+    evaluate = KubernetesPodOperator(
         task_id="mnist-evaluate",
         namespace="default",
         image="leoho0722/airflow-evaluate:0.0.4-k8s",
@@ -74,16 +68,6 @@ with DAG(
         startup_timeout_seconds=1200,
         image_pull_policy="Always",
         env_vars=env_vars,
-        node_selector=node_selector
     )
 
-    buckets_create_op >> preprocess_op >> training_op >> evaluate_op
-
-
-class TFJobKubeflowOperator(BaseOperator):
-    def __init__(
-        self,
-        **kwargs
-    ):
-        super().__init__(**kwargs)
-    pass
+    buckets_create >> preprocess >> training >> evaluate  # type: ignore

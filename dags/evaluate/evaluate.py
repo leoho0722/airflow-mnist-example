@@ -1,5 +1,6 @@
 import os
 import pickle
+
 from keras.models import load_model
 from minio import Minio
 import numpy as np

@@ -3,8 +3,8 @@ FROM tensorflow/tensorflow:2.14.0-gpu
 
 WORKDIR /src
 
-COPY dags/training/model_training.py /src/training/model_training.py
+COPY dags/training/training.py /src/training/training.py
 
 RUN pip install minio
 
-CMD ["python", "/src/training/model_training.py"]
+CMD ["python", "/src/training/training.py"]
