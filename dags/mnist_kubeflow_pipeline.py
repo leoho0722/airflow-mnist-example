@@ -70,4 +70,4 @@ with DAG(
         env_vars=env_vars,
     )
 
-    buckets_create >> preprocess >> training_tfjob >> terminating_tfjob >> evaluate
+    buckets_create >> preprocess >> training_tfjob >> terminating_tfjob >> evaluate  # type: ignore
